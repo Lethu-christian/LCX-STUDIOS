@@ -13,13 +13,18 @@ serve(async (req) => {
     }
 
     try {
-        const { checkoutId } = await req.json()
+        const body = await req.json().catch(() => ({}));
+        const { checkoutId } = body;
 
         if (!checkoutId) {
-            throw new Error('Checkout ID is required')
+            throw new Error('Checkout ID is required');
         }
 
-        console.log(`Verifying checkout: ${checkoutId}`)
+        if (!YOCO_SECRET_KEY) {
+            throw new Error('YOCO_SECRET_KEY is not configured in Supabase secrets');
+        }
+
+        console.log(`Verifying checkout: ${checkoutId}`);
 
         const response = await fetch(`https://online.yoco.com/v1/checkouts/${checkoutId}`, {
             method: 'GET',
@@ -52,10 +57,11 @@ serve(async (req) => {
             },
         )
 
-    } catch (error) {
-        console.error('Internal error:', error.message)
+    } catch (err: any) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error('Internal error:', errorMessage);
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: errorMessage }),
             {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 400
