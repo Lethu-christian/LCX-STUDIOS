@@ -263,7 +263,19 @@ function handlePayment(amountInCents, description) {
                 alert("Payment failed: " + errorMessage);
             } else {
                 console.log("Token received: " + result.id);
-                alert("Success! Payment token created. Reference: " + result.id);
+                // Call verification edge function
+                supabase.functions.invoke('verify-yoco', {
+                    body: { checkoutId: result.id }
+                }).then(({ data, error }) => {
+                    if (error) {
+                        console.error("Verification failed:", error);
+                        alert("Payment received but verification failed. Please contact support.");
+                    } else if (data.success) {
+                        alert("Success! Your payment of " + (data.amount / 100) + " " + data.currency + " has been verified.");
+                    } else {
+                        alert("Payment status: " + data.status);
+                    }
+                });
             }
         }
     });
