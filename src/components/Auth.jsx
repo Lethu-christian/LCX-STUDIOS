@@ -1,0 +1,159 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { Mail, Lock, LogIn, UserPlus, Github, Chrome, AlertCircle, ArrowLeft } from 'lucide-react';
+
+const Auth = ({ onAuthSuccess, onBack }) => {
+    const [isLogin, setIsLogin] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleEmailAuth = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            if (isLogin) {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.auth.signUp({ email, password });
+                if (error) throw error;
+                alert('Success! Please check your email for the confirmation link.');
+            }
+            onAuthSuccess?.();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOAuth = async (provider) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) throw error;
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-md p-8 rounded-3xl bg-slate-900/50 border border-white/10 backdrop-blur-md shadow-2xl"
+            >
+                <button
+                    onClick={onBack}
+                    className="absolute top-6 left-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all"
+                >
+                    <ArrowLeft size={18} />
+                </button>
+
+                <div className="text-center mb-8">
+                    <div className="inline-flex p-3 rounded-2xl bg-blue-600/20 text-blue-400 mb-4">
+                        {isLogin ? <LogIn size={28} /> : <UserPlus size={28} />}
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                        {isLogin ? 'Welcome Back' : 'Join LCX STUDIOS'}
+                    </h2>
+                    <p className="text-slate-400">
+                        {isLogin ? 'Login to manage your business systems' : 'Create an account to get started'}
+                    </p>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                    <button
+                        onClick={() => handleOAuth('google')}
+                        disabled={loading}
+                        className="w-full py-3 px-4 rounded-xl bg-white text-slate-950 font-semibold flex items-center justify-center gap-3 hover:bg-slate-200 transition-all disabled:opacity-50"
+                    >
+                        <Chrome size={20} className="text-blue-600" />
+                        Continue with Google
+                    </button>
+
+                    <div className="relative flex items-center py-2">
+                        <div className="flex-grow border-t border-white/10"></div>
+                        <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-slate-500 font-bold">OR</span>
+                        <div className="flex-grow border-t border-white/10"></div>
+                    </div>
+                </div>
+
+                <form onSubmit={handleEmailAuth} className="space-y-4">
+                    <div className="space-y-2">
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                            <input
+                                type="email"
+                                placeholder="Email Address"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full py-3 pl-10 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-all"
+                                required
+                            />
+                        </div>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full py-3 pl-10 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 transition-all"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm"
+                            >
+                                <AlertCircle size={16} />
+                                {error}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-50 shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                        {loading ? 'Processing...' : isLogin ? 'Login' : 'Create Account'}
+                    </button>
+                </form>
+
+                <p className="mt-8 text-center text-slate-400">
+                    {isLogin ? "Don't have an account?" : "Already have an account?"}
+                    <button
+                        onClick={() => setIsLogin(!isLogin)}
+                        className="ml-2 text-blue-400 font-semibold hover:text-blue-300 transition-colors"
+                    >
+                        {isLogin ? 'Sign Up' : 'Login'}
+                    </button>
+                </p>
+            </motion.div>
+        </div>
+    );
+};
+
+export default Auth;

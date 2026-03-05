@@ -1,6 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LCX_LOGO_B64 } from "./assets/logo-b64";
+import { supabase } from "./lib/supabase";
+import Auth from "./components/Auth";
+import Account from "./components/Account";
 import {
     ArrowRight,
     BadgeCheck,
@@ -300,7 +303,7 @@ function SectionHeading({ eyebrow, title, description, center = false }) {
     );
 }
 
-function TopNav() {
+function TopNav({ session, onPortalClick }) {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -335,11 +338,19 @@ function TopNav() {
                 </nav>
 
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={onPortalClick}
+                        className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 md:inline-flex"
+                    >
+                        {session ? <LayoutDashboard className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                        {session ? "Portal" : "Login"}
+                    </button>
+
                     <a
                         href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
                         target="_blank"
                         rel="noreferrer"
-                        className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 md:inline-flex"
+                        className="hidden items-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-950 transition hover:bg-slate-200 md:inline-flex"
                     >
                         <MessageCircle className="h-4 w-4" />
                         Connect
@@ -1053,20 +1064,88 @@ function Footer() {
     );
 }
 
-export default function LCXStudiosWebsite() {
+export default function App() {
+    const [session, setSession] = useState(null);
+    const [view, setView] = useState('home'); // 'home' | 'auth' | 'account'
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+        });
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+            if (session && view === 'auth') setView('account');
+            if (!session) setView('home');
+        });
+
+        return () => subscription.unsubscribe();
+    }, [view]);
+
+    const handlePortalClick = () => {
+        if (session) {
+            setView('account');
+        } else {
+            setView('auth');
+        }
+    };
+
     return (
-        <div className="selection:bg-white selection:text-slate-950">
-            <TopNav />
-            <Hero />
-            <About />
-            <Services />
-            <PricingCards />
-            <Portfolio />
-            <PosterPricing />
-            <RequestForm />
-            <Contact />
-            <SmartChatWidget />
-            <Footer />
+        <div className="min-h-screen bg-slate-950 selection:bg-white selection:text-slate-950">
+            <TopNav session={session} onPortalClick={handlePortalClick} />
+
+            <AnimatePresence mode="wait">
+                {view === 'home' && (
+                    <motion.div
+                        key="home"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <Hero />
+                        <About />
+                        <Services />
+                        <Portfolio />
+                        <Pricing />
+                        <RequestSystem />
+                        <Contact />
+                        <Footer />
+                    </motion.div>
+                )}
+
+                {view === 'auth' && (
+                    <motion.div
+                        key="auth"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <Auth
+                            onAuthSuccess={() => setView('account')}
+                            onBack={() => setView('home')}
+                        />
+                    </motion.div>
+                )}
+
+                {view === 'account' && (
+                    <motion.div
+                        key="account"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <Account
+                            session={session}
+                            onSignOut={() => setView('home')}
+                            onBack={() => setView('home')}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <ChatWidget />
         </div>
     );
 }
