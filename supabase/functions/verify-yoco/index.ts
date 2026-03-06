@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
 
         // ── MODE: VERIFY CHECKOUT ────────────────────────────────────────────────
         if (mode === "verify") {
-            const { checkoutId, description } = body;
+            const { checkoutId, description, userId } = body;
 
             if (typeof checkoutId !== "string" || checkoutId.length < 5) {
                 return respond({ success: false, error: "checkoutId is required" }, 400);
@@ -129,17 +129,29 @@ Deno.serve(async (req) => {
                 return respond({ success: false, error: "Payment not completed", status: yocoData?.status }, 400);
             }
 
-            // Optional: log to a purchases table if it exists
-            try {
-                await supabase.from("purchases").insert({
+            // Idempotency check - don't double-record
+            const { data: existing } = await supabase
+                .from("purchases")
+                .select("id")
+                .eq("reference", checkoutId)
+                .maybeSingle();
+
+            if (!existing) {
+                const purchaseRecord: Record<string, unknown> = {
                     reference: checkoutId,
                     amount: typeof yocoData?.amount === "number" ? yocoData.amount / 100 : 0,
                     description: description || "LCX STUDIOS Purchase",
                     status: "success",
-                });
-            } catch (dbErr) {
-                // Non-fatal: log but don't fail the response
-                console.warn("Could not record purchase (table may not exist):", dbErr);
+                };
+                // Only add user_id if it's a valid UUID provided
+                if (userId && typeof userId === "string" && userId.length > 10) {
+                    purchaseRecord.user_id = userId;
+                }
+                const { error: dbErr } = await supabase.from("purchases").insert(purchaseRecord);
+                if (dbErr) console.warn("Could not record purchase:", dbErr.message);
+                else console.log("Purchase recorded ✅ for user:", userId || "guest");
+            } else {
+                console.log("Purchase already recorded (idempotent):", checkoutId);
             }
 
             console.log("Payment verified ✅:", checkoutId, yocoData?.status);
@@ -150,6 +162,7 @@ Deno.serve(async (req) => {
                 currency: yocoData?.currency,
             });
         }
+
 
         return respond({ success: false, error: "Invalid mode. Use 'create' or 'verify'." }, 400);
 

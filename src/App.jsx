@@ -294,7 +294,7 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
         const isReturning = params.get('yoco_return') === '1';
         const saved = JSON.parse(localStorage.getItem('pendingYocoPurchase') || '{}');
         if (isReturning && saved.checkoutId && saved.description === description && status === 'idle') {
-            verifyPayment(saved.checkoutId, saved.description, saved.onSuccessMsg);
+            verifyPayment(saved.checkoutId, saved.description, saved.userId);
         }
     }, []);
 
@@ -302,6 +302,10 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
         setLoading(true);
         setStatus('initializing');
         try {
+            // Get current user session to link purchase to account
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id || null;
+
             const returnUrl = window.location.origin + window.location.pathname + '?yoco_return=1';
             const { data, error } = await supabase.functions.invoke('verify-yoco', {
                 body: { mode: 'create', amountInCents, successUrl: returnUrl }
@@ -312,14 +316,14 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
                 throw new Error(data?.error || 'Could not initialize payment.');
             }
 
-            // Save pending purchase info to localStorage so we can verify on return
+            // Save pending purchase info so we can verify on return
             localStorage.setItem('pendingYocoPurchase', JSON.stringify({
                 checkoutId: data.checkoutId,
                 description,
                 amountInCents,
+                userId,
             }));
 
-            // Redirect to Yoco payment page
             window.location.href = data.redirectUrl;
 
         } catch (err) {
@@ -330,17 +334,16 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
         }
     };
 
-    const verifyPayment = async (checkoutId, desc) => {
+    const verifyPayment = async (checkoutId, desc, userId) => {
         setStatus('verifying');
         setLoading(true);
 
-        // Clean up URL
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
         try {
             const { data, error } = await supabase.functions.invoke('verify-yoco', {
-                body: { mode: 'verify', checkoutId, description: desc }
+                body: { mode: 'verify', checkoutId, description: desc, userId }
             });
 
             localStorage.removeItem('pendingYocoPurchase');
@@ -362,7 +365,7 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
 
     return (
         <div className="w-full space-y-3">
-            {/* LCX Logo preview above button */}
+            {/* LCX Logo above button */}
             <div className="flex items-center gap-3 mb-1">
                 <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
                 <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>

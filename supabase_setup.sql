@@ -80,3 +80,44 @@ CREATE POLICY "Update portfolio bucket"
 
 CREATE POLICY "Delete portfolio bucket"
     ON storage.objects FOR DELETE USING (bucket_id = 'portfolio');
+-- =============================================
+-- 4. PURCHASES TABLE (Payment History)
+-- =============================================
+CREATE TABLE IF NOT EXISTS purchases (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at timestamptz DEFAULT now() NOT NULL,
+    reference text NOT NULL UNIQUE,
+    description text NOT NULL DEFAULT 'LCX STUDIOS Purchase',
+    amount numeric(10, 2) NOT NULL DEFAULT 0,
+    status text NOT NULL DEFAULT 'success',
+    user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS purchases_user_id_idx ON purchases(user_id);
+CREATE INDEX IF NOT EXISTS purchases_reference_idx ON purchases(reference);
+
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users see own purchases" ON purchases;
+DROP POLICY IF EXISTS "Service role insert purchases" ON purchases;
+DROP POLICY IF EXISTS "Admin read all purchases" ON purchases;
+
+-- Users can only read their own purchases
+CREATE POLICY "Users see own purchases"
+    ON purchases FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- Edge function (service role) can insert purchases
+CREATE POLICY "Service role insert purchases"
+    ON purchases FOR INSERT WITH CHECK (true);
+
+-- Admins can read everything (using service role or is_admin profile check)
+CREATE POLICY "Admin read all purchases"
+    ON purchases FOR SELECT
+    USING (
+        EXISTS (
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.is_admin = true
+        )
+    );
