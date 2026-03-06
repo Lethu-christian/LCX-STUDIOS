@@ -36,7 +36,6 @@ import {
 
 const WHATSAPP_NUMBER = "27678846390";
 const EMAIL = "hello@lcxstudios.co";
-const YOCO_PUBLIC_KEY = "pk_live_0ae064d0XB1g5KAe73b4";
 
 // --- ANIMATION VARIANTS (LUXURY FEEL) ---
 const luxuryEase = [0.16, 1, 0.3, 1];
@@ -284,51 +283,113 @@ function createWhatsAppLink(message) {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-function handlePayment(amountInCents, description, onSuccess) {
-    if (typeof window.YocoSDK === 'undefined') {
-        alert("Payment system is still loading. Please try again in a moment.");
-        return;
-    }
+// ---------- YOCO PAY BUTTON COMPONENT (new redirect-based Checkout API) ----------
+function YocoPayButton({ amountInCents, description, onSuccess, label }) {
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState('idle'); // idle | initializing | verifying
 
-    const yoco = new window.YocoSDK({
-        publicKey: YOCO_PUBLIC_KEY,
-    });
-
-    yoco.showPopup({
-        amountInCents: amountInCents,
-        currency: 'ZAR',
-        name: 'LCX STUDIOS',
-        description: description,
-        callback: function (result) {
-            if (result.error) {
-                const msg = result.error.message || 'Payment unsuccessful. Please try again.';
-                console.error("Yoco error:", result.error);
-                alert("Payment failed: " + msg);
-            } else {
-                console.log("Yoco token received:", result.id);
-                // Attempt backend verification
-                supabase.functions.invoke('verify-yoco', {
-                    body: { checkoutId: result.id, amountInCents, description }
-                }).then(({ data, error }) => {
-                    if (error) {
-                        console.warn("Verification call failed (non-critical):", error);
-                        // Payment was received client-side — still trigger success
-                        if (onSuccess) onSuccess();
-                    } else if (data && data.success) {
-                        if (onSuccess) onSuccess();
-                    } else {
-                        // Verification returned non-success — still let user proceed
-                        console.warn("Verification status:", data?.status);
-                        if (onSuccess) onSuccess();
-                    }
-                }).catch(() => {
-                    // Network/edge function error — don't block user
-                    if (onSuccess) onSuccess();
-                });
-            }
+    // Auto-verify on return from Yoco payment page
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const isReturning = params.get('yoco_return') === '1';
+        const saved = JSON.parse(localStorage.getItem('pendingYocoPurchase') || '{}');
+        if (isReturning && saved.checkoutId && saved.description === description && status === 'idle') {
+            verifyPayment(saved.checkoutId, saved.description, saved.onSuccessMsg);
         }
-    });
+    }, []);
+
+    const handlePay = async () => {
+        setLoading(true);
+        setStatus('initializing');
+        try {
+            const returnUrl = window.location.origin + window.location.pathname + '?yoco_return=1';
+            const { data, error } = await supabase.functions.invoke('verify-yoco', {
+                body: { mode: 'create', amountInCents, successUrl: returnUrl }
+            });
+
+            if (error) throw new Error(error.message || 'Failed to start payment.');
+            if (!data?.success || !data?.redirectUrl) {
+                throw new Error(data?.error || 'Could not initialize payment.');
+            }
+
+            // Save pending purchase info to localStorage so we can verify on return
+            localStorage.setItem('pendingYocoPurchase', JSON.stringify({
+                checkoutId: data.checkoutId,
+                description,
+                amountInCents,
+            }));
+
+            // Redirect to Yoco payment page
+            window.location.href = data.redirectUrl;
+
+        } catch (err) {
+            console.error('Yoco create error:', err);
+            alert('Payment error: ' + err.message);
+            setLoading(false);
+            setStatus('idle');
+        }
+    };
+
+    const verifyPayment = async (checkoutId, desc) => {
+        setStatus('verifying');
+        setLoading(true);
+
+        // Clean up URL
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        try {
+            const { data, error } = await supabase.functions.invoke('verify-yoco', {
+                body: { mode: 'verify', checkoutId, description: desc }
+            });
+
+            localStorage.removeItem('pendingYocoPurchase');
+            setLoading(false);
+            setStatus('idle');
+
+            if (error || !data?.success) {
+                alert('Payment verification failed: ' + (data?.error || error?.message || 'Unknown error'));
+            } else {
+                if (onSuccess) onSuccess();
+            }
+        } catch (err) {
+            console.error('Verify error:', err);
+            alert('Verification error: ' + err.message);
+            setLoading(false);
+            setStatus('idle');
+        }
+    };
+
+    return (
+        <div className="w-full space-y-3">
+            {/* LCX Logo preview above button */}
+            <div className="flex items-center gap-3 mb-1">
+                <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
+                <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>
+            </div>
+            <button
+                onClick={handlePay}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 rounded-full bg-slate-950 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-600/20 active:scale-95 disabled:opacity-70 shadow-lg"
+            >
+                {loading ? (
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                ) : <WalletCards className="h-5 w-5" />}
+                {status === 'initializing' ? 'Initializing...' :
+                    status === 'verifying' ? 'Verifying payment...' :
+                        label || `Pay R${(amountInCents / 100).toFixed(0)}`}
+            </button>
+            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
+                <ShieldCheck className="h-3 w-3 text-green-500" />
+                Secured by Yoco Gateway
+            </div>
+        </div>
+    );
 }
+
 
 function SectionHeading({ eyebrow, title, description, center, theme = 'light' }) {
     return (
@@ -862,16 +923,6 @@ function PricingCards() {
 }
 
 function PosterPricing() {
-    const handlePosterPurchase = (pkg) => {
-        const amountString = pkg.price.replace(/[^0-9]/g, '');
-        const amountInCents = parseInt(amountString, 10) * 100;
-
-        handlePayment(amountInCents, `Purchase: ${pkg.title}`, () => {
-            const message = `Hello LCX STUDIOS. I have just paid ${pkg.price} for the ${pkg.title}. Here are my details for the design...`;
-            window.open(createWhatsAppLink(message), '_blank');
-        });
-    };
-
     return (
         <section className="bg-[#020617] py-32 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
@@ -887,31 +938,36 @@ function PosterPricing() {
                 />
 
                 <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {posterPricing.map((pkg, i) => (
-                        <motion.div
-                            key={pkg.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: i * 0.1 }}
-                            className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/40 p-10 backdrop-blur-xl transition-all hover:bg-slate-800/60 hover:border-blue-500/30 shadow-2xl"
-                        >
-                            <h4 className="text-sm font-black uppercase tracking-widest text-blue-400">{pkg.title}</h4>
-                            <div className="mt-4 flex items-baseline gap-1">
-                                <span className="text-4xl font-black text-white">{pkg.price}</span>
-                                <span className="text-xs font-medium text-slate-500">{pkg.note}</span>
-                            </div>
-                            <p className="mt-6 text-xs font-medium text-slate-400 leading-relaxed">{pkg.extra}</p>
-
-                            <button
-                                onClick={() => handlePosterPurchase(pkg)}
-                                className="mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900/50 backdrop-blur-md py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:border-blue-500 active:scale-95 shadow-xl"
+                    {posterPricing.map((pkg, i) => {
+                        const amountString = pkg.price.replace(/[^0-9]/g, '');
+                        const amountInCents = parseInt(amountString, 10) * 100;
+                        const waMsg = `Hello LCX STUDIOS. I have just paid ${pkg.price} for ${pkg.title}. Here are my design details...`;
+                        return (
+                            <motion.div
+                                key={pkg.title}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: i * 0.1 }}
+                                className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/40 p-10 backdrop-blur-xl transition-all hover:bg-slate-800/60 hover:border-blue-500/30 shadow-2xl"
                             >
-                                <WalletCards className="h-4 w-4" />
-                                Buy & Design
-                            </button>
-                        </motion.div>
-                    ))}
+                                <h4 className="text-sm font-black uppercase tracking-widest text-blue-400">{pkg.title}</h4>
+                                <div className="mt-4 flex items-baseline gap-1">
+                                    <span className="text-4xl font-black text-white">{pkg.price}</span>
+                                    <span className="text-xs font-medium text-slate-500">{pkg.note}</span>
+                                </div>
+                                <p className="mt-6 text-xs font-medium text-slate-400 leading-relaxed mb-10">{pkg.extra}</p>
+                                <YocoPayButton
+                                    amountInCents={amountInCents}
+                                    description={`Purchase: ${pkg.title}`}
+                                    label="Buy & Design"
+                                    onSuccess={() => {
+                                        window.open(createWhatsAppLink(waMsg), '_blank');
+                                    }}
+                                />
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>
