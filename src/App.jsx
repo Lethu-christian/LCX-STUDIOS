@@ -15,7 +15,7 @@ import {
     ChevronRight,
     Code2,
     Cpu,
-    Crown,
+    ShieldCheck,
     Globe,
     Image as ImageIcon,
     LayoutDashboard,
@@ -63,7 +63,7 @@ const serviceCards = [
         whatsapp: "Hello, I want a custom internal software system.",
     },
     {
-        icon: Crown,
+        icon: ShieldCheck,
         title: "Pageantry Voting Systems",
         desc: "High-conversion online voting systems for pageants and events with public pages, rankings, and admin control.",
         points: [
@@ -614,7 +614,7 @@ function About() {
                                 text: "Modern SaaS architecture that rivals international technology standards.",
                             },
                             {
-                                icon: Crown,
+                                icon: ShieldCheck,
                                 title: "Premium Visuals",
                                 text: "Luxury identity and UI direction that makes your brand stand out with prestige.",
                             },
@@ -1362,7 +1362,7 @@ function Footer() {
                 <div className="mt-20 pt-10 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
                     <div>© {new Date().getFullYear()} LCX STUDIOS. All rights reserved.</div>
                     <a href="/admin" className="hover:text-white transition-colors flex items-center gap-1">
-                        <Crown className="w-3 h-3" /> Admin Access
+                        <ShieldCheck className="w-3 h-3" /> Admin Access
                     </a>
                 </div>
             </div>

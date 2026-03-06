@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Globe, Shield, Search, MoreVertical, ArrowLeft,
-    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X, Crown
+    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -136,7 +136,7 @@ export default function Admin() {
             <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white text-center">
                 <div className="max-w-md w-full bg-slate-900/50 p-10 rounded-3xl border border-slate-700 shadow-2xl backdrop-blur">
                     <div className="mx-auto w-16 h-16 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-6">
-                        <Crown className="w-8 h-8" />
+                        <Shield className="w-8 h-8" />
                     </div>
                     <h1 className="text-2xl font-bold mb-2">Admin Control Center</h1>
                     <p className="text-slate-400 mb-8 text-sm">Please enter the master security PIN to authorize access.</p>
