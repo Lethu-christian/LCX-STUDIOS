@@ -1469,6 +1469,17 @@ export default function App() {
                                 />
                             </motion.div>
                         } />
+
+                        <Route path="/admin" element={
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="pt-32 pb-20 bg-slate-50 min-h-screen"
+                            >
+                                <Admin />
+                            </motion.div>
+                        } />
                     </Routes>
                 </AnimatePresence>
             </div>
