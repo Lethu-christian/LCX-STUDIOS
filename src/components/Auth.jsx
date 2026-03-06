@@ -52,10 +52,10 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-slate-950 border border-white/20 shadow-2xl">
+        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-slate-900 border border-slate-500 shadow-2xl">
             <button
                 onClick={onBack}
-                className="absolute top-6 left-6 p-2 rounded-full bg-[#020617] hover:bg-slate-950 hover:text-white text-slate-500 transition-all"
+                className="absolute top-6 left-6 p-2 rounded-full bg-[#020617] hover:bg-slate-900 hover:text-white text-slate-400 transition-all"
             >
                 <ArrowLeft size={18} />
             </button>
@@ -81,7 +81,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                             placeholder="Email Address"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
+                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-600 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -92,7 +92,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
+                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-600 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -115,7 +115,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 rounded-xl bg-slate-950 text-white font-bold hover:bg-slate-800 shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                    className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
                 >
                     {loading ? 'Processing...' : isLogin ? 'Login' : 'Create Account'}
                 </button>
