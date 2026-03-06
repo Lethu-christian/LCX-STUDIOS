@@ -811,21 +811,11 @@ function Services() {
 }
 
 function PricingCards() {
-    const [paidItems, setPaidItems] = useState({});
-
-    const handlePurchase = (pkg) => {
-        const amountString = pkg.price.replace(/[^0-9]/g, '');
-        const amountInCents = parseInt(amountString, 10) * 100;
-
-        handlePayment(amountInCents, `Payment for ${pkg.name}`, () => {
-            setPaidItems(prev => ({ ...prev, [pkg.name]: true }));
-        });
-    };
-
     return (
         <section id="pricing" className="bg-white py-32 relative overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                {/* Rental Tier */}
+
+                {/* ---- RENTAL TIER ---- */}
                 <div className="mb-40">
                     <SectionHeading
                         eyebrow="Rental Ecosystem"
@@ -834,34 +824,36 @@ function PricingCards() {
                         center
                     />
                     <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                        {rentalPackages.map((pkg, i) => (
-                            <motion.div
-                                key={pkg.name}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
-                                className="group rounded-[2.5rem] border border-slate-200/50 bg-white/30 p-10 backdrop-blur-3xl transition-all hover:bg-white/60 hover:shadow-2xl hover:border-blue-200 flex flex-col h-full shadow-lg"
-                            >
-                                <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">{pkg.name}</h4>
-                                <div className="mt-4 text-4xl font-black text-slate-950 tracking-tight">{pkg.price}</div>
-                                <p className="mt-6 text-sm font-medium text-slate-500 leading-relaxed flex-1">{pkg.desc}</p>
-
-                                <button
-                                    onClick={() => handlePurchase(pkg)}
-                                    className="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-slate-950 py-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-600/20 active:scale-95"
+                        {rentalPackages.map((pkg, i) => {
+                            const amountInCents = parseInt(pkg.price.replace(/[^0-9]/g, ''), 10) * 100;
+                            const waMsg = `Hello LCX STUDIOS. I have just paid ${pkg.price} to reserve the ${pkg.name}. Please confirm my rental.`;
+                            return (
+                                <motion.div
+                                    key={pkg.name}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
+                                    className="group rounded-[2.5rem] border border-slate-200/50 bg-white/30 p-10 backdrop-blur-3xl transition-all hover:bg-white/60 hover:shadow-2xl hover:border-blue-200 flex flex-col h-full shadow-lg"
                                 >
-                                    <WalletCards className="h-4 w-4" />
-                                    Reserve Now
-                                </button>
-                            </motion.div>
-                        ))}
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">{pkg.name}</h4>
+                                    <div className="mt-4 text-4xl font-black text-slate-950 tracking-tight">{pkg.price}</div>
+                                    <p className="mt-6 text-sm font-medium text-slate-500 leading-relaxed flex-1 mb-10">{pkg.desc}</p>
+                                    <YocoPayButton
+                                        amountInCents={amountInCents}
+                                        description={`Rental: ${pkg.name}`}
+                                        label="Reserve Now"
+                                        onSuccess={() => window.open(createWhatsAppLink(waMsg), '_blank')}
+                                    />
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
 
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
 
-                {/* Core Systems */}
+                {/* ---- ACQUISITION TIER ---- */}
                 <SectionHeading
                     eyebrow="Acquisitions"
                     title="Own the Full Architecture"
@@ -870,52 +862,55 @@ function PricingCards() {
                 />
 
                 <div className="mt-20 grid gap-10 lg:grid-cols-2">
-                    {votingPackages.map((pkg, i) => (
-                        <motion.div
-                            key={pkg.name}
-                            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1, ease: luxuryEase }}
-                            className={cn(
-                                "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
-                                pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
-                            )}
-                        >
-                            <div className="mb-10">
-                                <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
-                                <div className="mt-6 flex items-baseline gap-2">
-                                    <span className={cn("text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
-                                </div>
-                                <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
-                                    <Sparkles className="h-3 w-3" />
-                                    {pkg.support}
-                                </div>
-                            </div>
-
-                            <ul className="mb-12 flex-1 space-y-6">
-                                {pkg.features.map((feature) => (
-                                    <li key={feature} className="flex items-start gap-4 text-sm font-medium">
-                                        <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                                            <CheckCircle2 className="h-3 w-3" />
-                                        </div>
-                                        <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <button
-                                onClick={() => handlePurchase(pkg)}
+                    {votingPackages.map((pkg, i) => {
+                        const amountInCents = parseInt(pkg.price.replace(/[^0-9]/g, ''), 10) * 100;
+                        const waMsg = `Hello LCX STUDIOS. I have just made a payment of ${pkg.price} for the ${pkg.name} acquisition buy-out. Please get in touch to finalize.`;
+                        return (
+                            <motion.div
+                                key={pkg.name}
+                                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, ease: luxuryEase }}
                                 className={cn(
-                                    "flex w-full items-center justify-center gap-3 rounded-full py-6 text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl",
-                                    pkg.featured ? "bg-blue-600 text-white hover:bg-white hover:text-slate-950" : "bg-slate-950 text-white hover:bg-blue-600"
+                                    "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
+                                    pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
                                 )}
                             >
-                                <WalletCards className="h-5 w-5" />
-                                Acquisition Buy-out
-                            </button>
-                        </motion.div>
-                    ))}
+                                <div className="mb-10">
+                                    <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
+                                    <div className="mt-6 flex items-baseline gap-2">
+                                        <span className={cn("text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
+                                    </div>
+                                    <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
+                                        <Sparkles className="h-3 w-3" />
+                                        {pkg.support}
+                                    </div>
+                                </div>
+
+                                <ul className="mb-12 flex-1 space-y-6">
+                                    {pkg.features.map((feature) => (
+                                        <li key={feature} className="flex items-start gap-4 text-sm font-medium">
+                                            <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+                                                <CheckCircle2 className="h-3 w-3" />
+                                            </div>
+                                            <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* Override YocoPayButton button color for dark cards */}
+                                <div className={pkg.featured ? "[&_button]:bg-blue-600 [&_button]:hover:bg-white [&_button]:hover:text-slate-950 [&_span]:text-slate-400 [&_img]:opacity-80" : ""}>
+                                    <YocoPayButton
+                                        amountInCents={amountInCents}
+                                        description={`Acquisition: ${pkg.name}`}
+                                        label="Acquisition Buy-out"
+                                        onSuccess={() => window.open(createWhatsAppLink(waMsg), '_blank')}
+                                    />
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>
