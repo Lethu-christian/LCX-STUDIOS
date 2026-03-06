@@ -19,12 +19,19 @@ const Account = ({ session, onSignOut, onBack }) => {
             // Get user metadata (like name from Google)
             const metadata = user.user_metadata || {};
 
+            const { data: profileData, error } = await supabase
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', user.id)
+                .single();
+
             setProfile({
                 email: user.email,
                 name: metadata.full_name || metadata.name || 'LCX Client',
                 avatar: metadata.avatar_url || metadata.picture,
                 lastSignIn: new Date(user.last_sign_in_at).toLocaleDateString(),
                 joined: new Date(user.created_at).toLocaleDateString(),
+                isAdmin: profileData?.is_admin || false,
             });
         } catch (error) {
             console.error('Error loading user profile:', error);
@@ -126,6 +133,15 @@ const Account = ({ session, onSignOut, onBack }) => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {profile.isAdmin && (
+                                <button
+                                    onClick={() => window.location.href = '/admin'}
+                                    className="p-6 rounded-2xl bg-blue-600 border border-blue-500 text-left hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                                >
+                                    <h4 className="text-white font-bold mb-1">Admin Dashboard</h4>
+                                    <p className="text-blue-100 text-xs">Manage users and sites</p>
+                                </button>
+                            )}
                             <button className="p-6 rounded-2xl bg-slate-100 border border-slate-200 text-left hover:bg-slate-200 transition-all">
                                 <h4 className="text-slate-950 font-bold mb-1">Billing History</h4>
                                 <p className="text-slate-600 text-xs">Manage your invoices</p>

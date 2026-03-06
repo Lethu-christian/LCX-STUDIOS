@@ -5,6 +5,7 @@ import { LCX_LOGO_B64 } from "./assets/logo-b64";
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
 import Account from "./components/Account";
+import Admin from "./components/Admin";
 import {
     ArrowRight,
     BadgeCheck,
@@ -173,7 +174,7 @@ const posterPricing = [
 const votingPackages = [
     {
         name: "Voting Only Package",
-        price: "R20,000",
+        price: "R45,000",
         support: "2 months service support/control",
         whatsapp: "Hello, I’m interested in your Voting Only Package.",
         featured: false,
@@ -192,7 +193,7 @@ const votingPackages = [
     },
     {
         name: "Full Voting System",
-        price: "R50,000",
+        price: "R100,000",
         support: "1 year service support/control",
         whatsapp: "Hello, I’m interested in the Full Voting System.",
         featured: true,
@@ -209,6 +210,33 @@ const votingPackages = [
     },
 ];
 
+const rentalPackages = [
+    {
+        name: "1 Month Rental",
+        price: "R6,000",
+        desc: "Includes custom domain & hosting for 1 month.",
+        whatsapp: "Hello, I want to rent the voting system for 1 month.",
+    },
+    {
+        name: "3 Months Rental",
+        price: "R8,000",
+        desc: "Includes custom domain & hosting for 3 months.",
+        whatsapp: "Hello, I want to rent the voting system for 3 months.",
+    },
+    {
+        name: "6 Months Rental",
+        price: "R10,000",
+        desc: "Includes custom domain & hosting for 6 months.",
+        whatsapp: "Hello, I want to rent the voting system for 6 months.",
+    },
+    {
+        name: "1 Year Rental",
+        price: "R15,000",
+        desc: "Includes custom domain & hosting for 12 months.",
+        whatsapp: "Hello, I want to rent the voting system for 12 months.",
+    },
+];
+
 const buyOptions = [
     {
         title: "Custom Internal Software",
@@ -219,14 +247,14 @@ const buyOptions = [
     },
     {
         title: "Voting Only Package",
-        price: "R20,000",
+        price: "R45,000",
         description: "A streamlined pageant voting platform with essential public pages and admin updates.",
         cta: "Buy This Package",
         message: "Hello, I’m interested in your Voting Only Package.",
     },
     {
         title: "Full Voting System",
-        price: "R50,000",
+        price: "R100,000",
         description: "A scalable full-featured voting system with analytics, client portal, and advanced controls.",
         cta: "Buy This Package",
         message: "Hello, I’m interested in the Full Voting System.",
@@ -540,17 +568,20 @@ function Hero() {
 
 function About() {
     return (
-        <section id="about" className="relative bg-white py-32 overflow-hidden">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <section id="about" className="relative bg-slate-950 py-32 overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.2),transparent_70%)]" />
+            </div>
+            <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="grid gap-20 lg:grid-cols-2">
                     <div className="space-y-8">
-                        <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">
+                        <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">
                             Visionary Logic
                         </div>
-                        <h2 className="text-5xl font-black tracking-tight text-slate-950 lg:text-7xl leading-[1.1]">
+                        <h2 className="text-5xl font-black tracking-tight text-white lg:text-7xl leading-[1.1]">
                             The technology partner for the next generation of business.
                         </h2>
-                        <p className="text-lg leading-relaxed text-slate-600 max-w-xl">
+                        <p className="text-lg leading-relaxed text-slate-400 max-w-xl">
                             LCX STUDIOS is a powerhouse for custom software and creative execution. We eliminate the gap between technical complexity and aesthetic excellence, delivering systems that work as beautifully as they look.
                         </p>
                     </div>
@@ -574,25 +605,22 @@ function About() {
                             },
                             {
                                 icon: Crown,
-                                title: "Niche Expertise",
-                                text: "Specialized platforms for pageantry and events with built-in conversion focus.",
+                                title: "Premium Visuals",
+                                text: "Luxury identity and UI direction that makes your brand stand out with prestige.",
                             },
-                        ].map((item, i) => (
+                        ].map((item, id) => (
                             <motion.div
-                                key={item.title}
+                                key={id}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="group rounded-[2.5rem] border border-slate-100 bg-slate-50 p-8 transition-all hover:bg-white hover:shadow-2xl hover:shadow-slate-200"
+                                transition={{ delay: id * 0.1 }}
+                                className="group relative rounded-3xl border border-white/5 bg-white/5 p-8 transition-all hover:bg-white/10"
                             >
-                                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-950 group-hover:scale-110 transition-transform">
+                                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
                                     <item.icon className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-950 tracking-tight">{item.title}</h3>
-                                <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                                    {item.text}
-                                </p>
+                                <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{item.text}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -660,69 +688,92 @@ function Services() {
 
 function PricingCards() {
     return (
-        <section id="pricing" className="relative bg-white py-32">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <section id="pricing" className="bg-slate-950 py-32 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.1),transparent_50%)]" />
+            <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
-                    eyebrow="Deployment Models"
-                    title="Scaleable systems for pageantry and events."
-                    description="Ready-made packages built for high conversion. Get the source code and dedicated support."
+                    eyebrow="Pricing"
+                    title="Premium Voting Solutions"
+                    description="Choose the package that fits your event scale. All systems are custom-coded for high-end performance."
                     center
                 />
 
                 <div className="mt-20 grid gap-8 lg:grid-cols-2">
-                    {votingPackages.map((pkg) => (
+                    {votingPackages.map((pkg, i) => (
                         <motion.div
                             key={pkg.name}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
                             className={cn(
-                                "relative flex flex-col rounded-[3rem] p-12 border transition-all",
-                                pkg.featured
-                                    ? "border-cyan-500 bg-gradient-to-br from-cyan-500/10 via-blue-600/10 to-transparent shadow-[0_0_80px_rgba(34,211,238,0.15)]"
-                                    : "border-slate-200 bg-slate-100"
+                                "relative flex flex-col rounded-[2.5rem] border p-10 transition-all hover:scale-[1.02]",
+                                pkg.featured ? "border-blue-500 bg-white/5 shadow-[0_0_50px_rgba(59,130,246,0.1)]" : "border-white/10 bg-white/5"
                             )}
                         >
-                            {pkg.featured && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-white px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-slate-950 shadow-xl">
-                                    Enterprise Gold
+                            <div className="mb-8">
+                                <h3 className="text-2xl font-bold text-white">{pkg.name}</h3>
+                                <div className="mt-4 flex items-baseline gap-2">
+                                    <span className="text-5xl font-black tracking-tight text-white">{pkg.price}</span>
                                 </div>
-                            )}
-
-                            <div className="mb-10">
-                                <h3 className="text-2xl font-bold text-slate-950 tracking-tight">{pkg.name}</h3>
-                                <div className="mt-6 text-5xl font-black text-slate-950">{pkg.price}</div>
-                                <div className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950/60">
-                                    {pkg.support}
-                                </div>
+                                <p className="mt-4 text-sm text-blue-400 font-semibold">{pkg.support}</p>
                             </div>
 
-                            <div className="mb-12 space-y-5">
-                                {pkg.features.map((f) => (
-                                    <div key={f} className="flex items-start gap-4 text-sm text-slate-600">
-                                        <ShieldCheck className="h-5 w-5 text-slate-950/50 shrink-0" />
-                                        <span className="leading-relaxed">{f}</span>
-                                    </div>
+                            <ul className="mb-10 flex-1 space-y-4">
+                                {pkg.features.map((feature) => (
+                                    <li key={feature} className="flex items-center gap-3 text-sm text-slate-400">
+                                        <BadgeCheck className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                                        {feature}
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
 
-                            <div className="mt-auto grid gap-4 sm:grid-cols-2">
-                                <button
-                                    onClick={() => handlePayment(parseInt(pkg.price.replace(/[^\d]/g, '')) * 100, pkg.name)}
-                                    className="flex items-center justify-center rounded-2xl bg-white px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-950 transition-transform active:scale-95"
-                                >
-                                    Buy Now
-                                </button>
+                            <a
+                                href={createWhatsAppLink(pkg.whatsapp)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={cn(
+                                    "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold uppercase tracking-widest transition-all",
+                                    pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500" : "bg-white/10 text-white hover:bg-white/20"
+                                )}
+                            >
+                                <MessageCircle className="h-5 w-5" />
+                                Buy This Package
+                            </a>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Rental Section */}
+                <div className="mt-32">
+                    <SectionHeading
+                        eyebrow="Rental Service"
+                        title="Rent the Voting System"
+                        description="Temporary usage options including custom domain & hosting. Service ends after the period."
+                        center
+                    />
+                    <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        {rentalPackages.map((pkg, i) => (
+                            <motion.div
+                                key={pkg.name}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="rounded-3xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10"
+                            >
+                                <h4 className="text-lg font-bold text-white">{pkg.name}</h4>
+                                <div className="mt-2 text-3xl font-black text-blue-400">{pkg.price}</div>
+                                <p className="mt-4 text-xs text-slate-400 leading-relaxed">{pkg.desc}</p>
                                 <a
                                     href={createWhatsAppLink(pkg.whatsapp)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-950 hover:bg-slate-200"
+                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-3 text-xs font-bold text-white transition-all hover:bg-white/20"
                                 >
-                                    WhatsApp
+                                    Rent System
                                 </a>
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
