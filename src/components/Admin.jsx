@@ -177,13 +177,13 @@ export default function Admin() {
                     </div>
                     <div className="flex bg-slate-900/10 p-1 rounded-2xl overflow-x-auto no-scrollbar max-w-full">
                         <button
-                            className={cn("whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'overview' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
+                            className={cn("whitespace-nowrap px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'overview' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
                             onClick={() => setActiveTab('overview')}
                         >
                             Overview
                         </button>
                         <button
-                            className={cn("whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'portfolio' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
+                            className={cn("whitespace-nowrap px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'portfolio' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
                             onClick={() => setActiveTab('portfolio')}
                         >
                             Portfolio Manager

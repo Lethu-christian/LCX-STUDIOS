@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { LCX_LOGO_B64 } from "./assets/logo-b64";
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
@@ -37,6 +37,22 @@ import {
 const WHATSAPP_NUMBER = "27678846390";
 const EMAIL = "hello@lcxstudios.co";
 const YOCO_PUBLIC_KEY = "pk_live_0ae064d0XB1g5KAe73b4";
+
+// --- ANIMATION VARIANTS (LUXURY FEEL) ---
+const luxuryEase = [0.16, 1, 0.3, 1];
+
+const fadeUpVariant = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 1, ease: luxuryEase } }
+};
+
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+    }
+};
 
 const navItems = [
     { label: "About", href: "#about" },
@@ -311,46 +327,43 @@ function handlePayment(amountInCents, description, onSuccess) {
     });
 }
 
-function SectionHeading({ eyebrow, title, description, center = false, theme = "light" }) {
-    const isDark = theme === "dark";
+function SectionHeading({ eyebrow, title, description, center, theme = 'light' }) {
     return (
-        <div className={cn("max-w-3xl", center && "mx-auto text-center")}>
+        <div className={cn("max-w-3xl mb-12 sm:mb-20", center && "mx-auto text-center")}>
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
                 className={cn(
-                    "mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.3em] backdrop-blur-xl",
-                    isDark ? "border-slate-600 bg-slate-900/5 text-cyan-400" : "border-primary bg-white text-slate-900 shadow-sm"
+                    "mb-4 inline-flex items-center rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.3em] shadow-sm",
+                    theme === 'dark' ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" : "bg-cyan-50 text-cyan-600 border border-cyan-100"
                 )}
             >
-                <Sparkles className="h-3 w-3" />
                 {eyebrow}
             </motion.div>
             <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
                 className={cn(
-                    "text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl",
-                    isDark ? "text-white" : "text-slate-950"
+                    "text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl",
+                    theme === 'dark' ? "text-white" : "text-slate-950"
                 )}
             >
                 {title}
             </motion.h2>
-            <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className={cn(
-                    "mt-6 text-base leading-8 sm:text-lg",
-                    isDark ? "text-slate-400" : "text-slate-600"
-                )}
-            >
-                {description}
-            </motion.p>
+            {description && (
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className={cn(
+                        "mt-6 text-base leading-8 sm:text-lg",
+                        theme === 'dark' ? "text-slate-400" : "text-slate-600"
+                    )}
+                >
+                    {description}
+                </motion.p>
+            )}
         </div>
     );
 }
@@ -367,23 +380,19 @@ function TopNav({ session, onPortalClick }) {
 
     return (
         <header className={cn(
-            "fixed top-0 z-50 w-full transition-all duration-300",
-            scrolled ? "border-b border-slate-600 bg-slate-900/80 p-4 backdrop-blur-xl" : "bg-transparent p-6"
+            "fixed top-0 z-50 w-full transition-all duration-500",
+            scrolled ? "bg-white/80 border-b border-slate-200 py-3 sm:py-4 backdrop-blur-xl" : "bg-transparent py-6 sm:py-8"
         )}>
-            <div className="mx-auto flex max-w-7xl items-center justify-between">
-                <a href="#home" className="flex items-center gap-4 transition-transform hover:scale-105">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-600 bg-[#020617] shadow-[0_0_50px_rgba(34,211,238,0.2)] overflow-hidden">
-                        <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-cover" />
-                    </div>
-                    <div className="hidden sm:block">
-                        <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-cyan-400/80">Premium Studio</div>
-                        <div className="text-xl font-black tracking-[0.2em] text-white">LCX STUDIOS</div>
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-8">
+                <a href="#home" className="flex items-center gap-4 transition-transform hover:scale-105 active:scale-95">
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden p-1.5">
+                        <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-contain" />
                     </div>
                 </a>
 
-                <nav className="hidden items-center gap-8 md:flex">
+                <nav className="hidden items-center gap-10 md:flex">
                     {navItems.map((item) => (
-                        <a key={item.href} href={item.href} className="text-sm font-medium text-slate-400 transition hover:text-cyan-300">
+                        <a key={item.href} href={item.href} className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 transition hover:text-slate-950">
                             {item.label}
                         </a>
                     ))}
@@ -392,25 +401,15 @@ function TopNav({ session, onPortalClick }) {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onPortalClick}
-                        className="hidden items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-slate-800 md:inline-flex"
+                        className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition hover:bg-slate-50 md:inline-flex shadow-sm hover:shadow-md active:scale-95"
                     >
                         {session ? <LayoutDashboard className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                        {session ? "Portal" : "Login / Register"}
+                        {session ? "Portal" : "Join Platform"}
                     </button>
-
-                    <a
-                        href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="hidden items-center gap-2 rounded-full bg-slate-900 border border-slate-700 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-slate-800 md:inline-flex"
-                    >
-                        <MessageCircle className="h-4 w-4" />
-                        Connect
-                    </a>
 
                     <button
                         onClick={() => setOpen(!open)}
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-600 bg-slate-900 text-white transition hover:bg-slate-800 md:hidden"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-950 transition hover:bg-slate-50 md:hidden shadow-sm"
                     >
                         {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </button>
@@ -420,33 +419,24 @@ function TopNav({ session, onPortalClick }) {
             <AnimatePresence>
                 {open && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 overflow-hidden rounded-3xl border border-slate-600 bg-[#020617]/95 p-6 backdrop-blur-2xl md:hidden"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="absolute inset-x-0 top-full mt-4 mx-4 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white/95 p-8 shadow-2xl backdrop-blur-2xl md:hidden"
                     >
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-8">
                             {navItems.map((item) => (
-                                <a key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-lg font-medium text-slate-300 transition hover:text-cyan-300">
+                                <a key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-sm font-black uppercase tracking-widest text-slate-500 transition hover:text-slate-950">
                                     {item.label}
                                 </a>
                             ))}
                             <button
                                 onClick={() => { setOpen(false); onPortalClick(); }}
-                                className="flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-slate-900 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-slate-800"
+                                className="flex items-center justify-center gap-2 rounded-3xl bg-slate-950 py-5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-slate-800 shadow-xl active:scale-95"
                             >
                                 {session ? <LayoutDashboard className="h-5 w-5" /> : <User className="h-5 w-5" />}
-                                {session ? "Access Portal" : "Login / Register"}
+                                {session ? "Access Portal" : "Get Started"}
                             </button>
-                            <a
-                                href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-500 py-4 text-sm font-bold text-white"
-                            >
-                                <MessageCircle className="h-5 w-5" />
-                                Chat on WhatsApp
-                            </a>
                         </div>
                     </motion.div>
                 )}
@@ -456,180 +446,198 @@ function TopNav({ session, onPortalClick }) {
 }
 
 function Hero() {
-    return (
-        <section id="home" className="relative min-h-screen overflow-hidden pt-32 lg:pt-0 lg:flex lg:items-center bg-white border-b border-slate-200">
-            {/* Background Effects */}
-            <div className="absolute inset-0 z-0 text-slate-900">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.02),transparent_50%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.05),transparent_40%)]" />
-                <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(rgba(15,23,42,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.1)_1px,transparent_1px)] [background-size:100px_100px]" />
+    const { scrollY } = useScroll();
+    const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+    const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
-                {/* Animated Glows */}
-                <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                    transition={{ duration: 10, repeat: Infinity }}
-                    className="absolute -top-[20%] -left-[10%] h-[80%] w-[80%] rounded-full bg-cyan-400/10 blur-[120px]"
-                />
-                <motion.div
-                    animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-                    transition={{ duration: 12, repeat: Infinity }}
-                    className="absolute -bottom-[20%] -right-[10%] h-[80%] w-[80%] rounded-full bg-blue-500/10 blur-[120px]"
-                />
+    return (
+        <section id="home" className="relative min-h-screen overflow-hidden lg:flex lg:items-center bg-white">
+            {/* Elite Background */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[#f8fafc]" />
+                <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(#0f172a_1.5px,transparent_1.5px)] [background-size:40px_40px]" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
             </div>
 
-            <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
-                <div className="flex flex-col justify-center">
+            <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-6 sm:px-12 py-32 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+                <motion.div style={{ opacity }} className="flex flex-col justify-center">
                     <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-cyan-600 shadow-sm"
+                        variants={fadeUpVariant}
+                        initial="hidden"
+                        animate="visible"
+                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.4em] text-slate-950 shadow-sm w-fit"
                     >
                         <div className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-500 opacity-75"></span>
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500"></span>
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75"></span>
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
                         </div>
                         Premium Technology Studio
                     </motion.div>
 
                     <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-5xl font-bold tracking-tighter text-slate-950 sm:text-6xl md:text-7xl lg:text-8xl"
+                        variants={fadeUpVariant}
+                        initial="hidden"
+                        animate="visible"
+                        className="text-3xl font-black tracking-tighter text-slate-950 sm:text-5xl md:text-7xl lg:text-8xl leading-[1.05]"
                     >
-                        LCX STUDIOS builds <span className="text-slate-950 drop-shadow-sm">high-end</span> digital systems.
+                        Crafting <span className="text-blue-600">elite</span> digital systems.
                     </motion.h1>
 
                     <motion.p
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl"
+                        variants={fadeUpVariant}
+                        initial="hidden"
+                        animate="visible"
+                        className="mt-10 max-w-2xl text-lg font-medium leading-[1.6] text-slate-500 sm:text-xl"
                     >
-                        A premium technology and creative studio crafting custom internal systems, SaaS platforms,
-                        and elite visual identities for modern brands and businesses.
+                        LCX STUDIOS is a next-gen technology house specialized in custom internal software,
+                        SaaS architecture, and high-performance pageant voting systems.
                     </motion.p>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-12 flex flex-col sm:flex-row flex-wrap gap-5"
+                        variants={fadeUpVariant}
+                        initial="hidden"
+                        animate="visible"
+                        className="mt-12 flex flex-col sm:flex-row flex-wrap gap-6"
                     >
-                        <a href="#services" className="group relative overflow-hidden rounded-full bg-slate-900 px-8 py-5 text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-xl hover:bg-slate-800 text-center">
-                            View Services
+                        <a href="#services" className="group relative overflow-hidden rounded-full bg-slate-950 px-10 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:scale-105 hover:shadow-[0_20px_40px_rgba(15,23,42,0.2)] active:scale-95 text-center w-full sm:w-auto">
+                            Explore Services
                         </a>
-                        <a href="#pricing" className="rounded-full border border-slate-200 px-8 py-5 text-sm font-bold text-slate-900 transition-all hover:bg-slate-50 text-center">
-                            Buy a Service
-                        </a>
-                        <a href="#request" className="flex items-center justify-center gap-2 px-4 py-5 font-bold text-slate-900 transition-colors hover:text-slate-600">
-                            Request System <ArrowRight className="h-4 w-4" />
+                        <a href="#pricing" className="rounded-full border border-slate-200 bg-white px-10 py-5 text-xs font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 text-center w-full sm:w-auto">
+                            View Pricing
                         </a>
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="mt-16 grid grid-cols-2 gap-6 border-t border-slate-200 pt-12 text-slate-500 sm:grid-cols-4"
+                        variants={fadeUpVariant}
+                        initial="hidden"
+                        animate="visible"
+                        className="mt-20 grid grid-cols-2 gap-8 border-t border-slate-100 pt-12 sm:grid-cols-4"
                     >
                         {[
                             { val: "100%", label: "Custom Code" },
-                            { val: "24/7", label: "Support Ready" },
-                            { val: "Modern", label: "SaaS Stack" },
-                            { val: "Premium", label: "Visuals" },
+                            { val: "24/7", label: "Studio Support" },
+                            { val: "SaaS", label: "Architecture" },
+                            { val: "Premium", label: "UI Design" },
                         ].map((stat) => (
                             <div key={stat.label}>
-                                <div className="text-xl font-bold text-slate-900">{stat.val}</div>
-                                <div className="text-[10px] uppercase tracking-widest">{stat.label}</div>
+                                <div className="text-2xl font-black text-slate-950 tracking-tight">{stat.val}</div>
+                                <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
                             </div>
                         ))}
                     </motion.div>
-                </div>
+                </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.2 }}
+                    style={{ y: y1 }}
+                    initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ duration: 1.5, ease: luxuryEase }}
                     className="relative flex items-center justify-center lg:block"
                 >
-                    <div className="absolute -inset-10 bg-slate-900 blur-[100px]" />
+                    <div className="absolute -inset-20 bg-blue-500/5 blur-[120px] rounded-full" />
                     <div className="relative group">
                         <motion.div
                             animate={{
-                                y: [0, -20, 0],
-                                rotateY: [0, 5, 0],
+                                y: [0, -25, 0],
+                                rotateY: [0, 8, 0],
                             }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                            className="relative z-10 flex h-[450px] w-[450px] items-center justify-center rounded-[4rem] border border-slate-600 bg-slate-900 p-12 shadow-[0_0_100px_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-all group-hover:border-slate-500"
+                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                            className="relative z-10 flex h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] items-center justify-center rounded-[4rem] border border-slate-200 bg-white p-12 shadow-[0_40px_100px_rgba(0,0,0,0.08)] backdrop-blur-2xl transition-all group-hover:border-slate-300 group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.12)]"
                         >
                             <img
                                 src="/logo.png"
-                                alt="LCX Large Logo"
-                                className="h-full w-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                                alt="LCX Studio Large Logo"
+                                className="h-full w-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-transform duration-700 group-hover:scale-110"
                             />
+
+                            {/* Floating Accents */}
+                            <div className="absolute -top-6 -right-6 h-20 w-20 rounded-3xl bg-blue-600 shadow-lg flex items-center justify-center text-white">
+                                <Sparkles className="h-10 w-10" />
+                            </div>
+                            <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-[2.5rem] border border-slate-200 bg-white shadow-xl flex items-center justify-center p-6">
+                                <Bot className="h-full w-full text-blue-600" />
+                            </div>
                         </motion.div>
                     </div>
                 </motion.div>
             </div>
-        </section >
+        </section>
     );
 }
 
 function About() {
     return (
-        <section id="about" className="relative bg-slate-900 py-32 overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.2),transparent_70%)]" />
+        <section id="about" className="relative bg-[#020617] py-32 overflow-hidden">
+            <div className="absolute inset-0 opacity-20">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+                <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
             </div>
+
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="grid gap-20 lg:grid-cols-2">
-                    <div className="space-y-8">
-                        <div className="inline-flex items-center gap-3 rounded-full border border-slate-600 bg-slate-900/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">
+                <div className="grid gap-20 lg:grid-cols-2 lg:items-center">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="space-y-10"
+                    >
+                        <motion.div
+                            variants={fadeUpVariant}
+                            className="inline-flex items-center gap-3 rounded-full border border-blue-500/30 bg-blue-500/10 px-5 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-blue-400"
+                        >
                             Visionary Logic
-                        </div>
-                        <h2 className="text-5xl font-black tracking-tight text-white lg:text-7xl leading-[1.1]">
-                            The technology partner for the next generation of business.
-                        </h2>
-                        <p className="text-lg leading-relaxed text-slate-400 max-w-xl">
-                            LCX STUDIOS is a powerhouse for custom software and creative execution. We eliminate the gap between technical complexity and aesthetic excellence, delivering systems that work as beautifully as they look.
-                        </p>
-                    </div>
+                        </motion.div>
+                        <motion.h2
+                            variants={fadeUpVariant}
+                            className="text-4xl font-black tracking-tighter text-white sm:text-6xl lg:text-7xl leading-[1.05]"
+                        >
+                            Propelling business into the <span className="text-blue-500">future</span>.
+                        </motion.h2>
+                        <motion.p
+                            variants={fadeUpVariant}
+                            className="text-lg font-medium leading-relaxed text-slate-400 max-w-xl"
+                        >
+                            LCX STUDIOS is an elite digital engineering studio. We combine high-performance code with world-class design to build systems that define current industry standards.
+                        </motion.p>
+                    </motion.div>
 
                     <div className="grid gap-6 sm:grid-cols-2">
                         {[
                             {
                                 icon: Zap,
-                                title: "Rapid Deployment",
-                                text: "Efficient workflows that get your system live faster without sacrificing quality.",
+                                title: "Elite Execution",
+                                text: "Ultra-fast deployment cycles built on robust, scalable modern frameworks.",
                             },
                             {
                                 icon: ShieldCheck,
-                                title: "Proven Reliability",
-                                text: "Robust internal business tools built to handle scale and complex operations.",
+                                title: "High Security",
+                                text: "Business-grade security measures for every line of code we ship.",
                             },
                             {
                                 icon: Globe,
-                                title: "Global Standards",
-                                text: "Modern SaaS architecture that rivals international technology standards.",
+                                title: "Global Reach",
+                                text: "Architectures designed for international scale and high-traffic reliability.",
                             },
                             {
-                                icon: ShieldCheck,
-                                title: "Premium Visuals",
-                                text: "Luxury identity and UI direction that makes your brand stand out with prestige.",
+                                icon: Cpu,
+                                title: "Advanced Tech",
+                                text: "Utilizing modern AI and cloud infrastructure for superior performance.",
                             },
                         ].map((item, id) => (
                             <motion.div
                                 key={id}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: id * 0.1 }}
-                                className="group relative rounded-3xl border border-slate-700 bg-slate-900/5 p-8 transition-all hover:bg-slate-900/10"
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: id * 0.1, ease: luxuryEase }}
+                                className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/50 p-8 transition-all hover:bg-slate-800/80 hover:border-slate-700 hover:-translate-y-2 shadow-2xl"
                             >
-                                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
-                                    <item.icon className="h-6 w-6" />
+                                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/10 text-blue-500 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                                    <item.icon className="h-7 w-7" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white">{item.title}</h3>
-                                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{item.text}</p>
+                                <h3 className="text-xl font-bold text-white tracking-tight">{item.title}</h3>
+                                <p className="mt-3 text-sm font-medium text-slate-400 leading-relaxed">{item.text}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -641,51 +649,55 @@ function About() {
 
 function Services() {
     return (
-        <section id="services" className="relative bg-slate-50 border-y border-slate-200 py-32">
+        <section id="services" className="relative bg-slate-50 py-32 overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
                     eyebrow="Capabilities"
-                    title="Full-stack tech and design under one banner."
-                    description="From internal dashboards for multi-branch companies to high-profile voting systems and premium brand visuals."
+                    title="Engineered for excellence."
+                    description="Our studio specializes in the architecture of complex digital systems and high-end brand identities."
                     center
                 />
 
-                <div className="mt-20 grid gap-8 lg:grid-cols-2">
+                <div className="mt-20 grid gap-10 lg:grid-cols-2">
                     {serviceCards.map((service, i) => (
                         <motion.div
                             key={service.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="group glass-card relative rounded-[3rem] p-10 transition-all hover:bg-white border rounded-[3rem] border-slate-200 bg-white/50 shadow-sm hover:shadow-md"
+                            transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
+                            className="group relative rounded-[3rem] p-1 sm:p-1.5 transition-all hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)]"
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-cyan-100 text-cyan-600 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
-                                    <service.icon className="h-8 w-8" />
-                                </div>
-                                <a
-                                    href={createWhatsAppLink(service.whatsapp)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="rounded-full border border-slate-300 bg-white px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 shadow-sm"
-                                >
-                                    WhatsApp <ChevronRight className="ml-2 inline h-4 w-4" />
-                                </a>
-                            </div>
-
-                            <h3 className="mt-10 text-3xl font-bold text-slate-900 tracking-tight">{service.title}</h3>
-                            <p className="mt-6 text-slate-600 leading-relaxed max-w-lg">
-                                {service.desc}
-                            </p>
-
-                            <div className="mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2">
-                                {service.points.map((point) => (
-                                    <div key={point} className="flex items-center gap-3 rounded-2xl bg-white border border-slate-100 shadow-sm px-5 py-4 text-xs font-medium text-slate-700">
-                                        <CheckCircle2 className="h-4 w-4 text-cyan-500 shrink-0" />
-                                        {point}
+                            <div className="relative overflow-hidden rounded-[2.8rem] bg-white border border-slate-200 p-8 sm:p-12 h-full">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-8">
+                                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20">
+                                        <service.icon className="h-8 w-8" />
                                     </div>
-                                ))}
+                                    <a
+                                        href={createWhatsAppLink(service.whatsapp)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="rounded-full border border-slate-200 bg-white px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
+                                    >
+                                        Inquire <ChevronRight className="ml-2 h-4 w-4" />
+                                    </a>
+                                </div>
+
+                                <h3 className="mt-10 text-3xl font-black text-slate-950 tracking-tighter">{service.title}</h3>
+                                <p className="mt-6 text-base font-medium text-slate-500 leading-relaxed">
+                                    {service.desc}
+                                </p>
+
+                                <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                                    {service.points.map((point) => (
+                                        <div key={point} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 text-xs font-bold text-slate-700">
+                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+                                                <BadgeCheck className="h-4 w-4" />
+                                            </div>
+                                            {point}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </motion.div>
                     ))}
@@ -708,144 +720,148 @@ function PricingCards() {
     };
 
     return (
-        <section id="pricing" className="bg-white py-32 relative overflow-hidden border-y border-slate-200">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.05),transparent_50%)]" />
-            <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-                {/* Rental Section */}
-                <div className="mb-32">
+        <section id="pricing" className="bg-white py-32 relative overflow-hidden">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                {/* Rental Tier */}
+                <div className="mb-40">
                     <SectionHeading
-                        eyebrow="Rental Service"
-                        title="Rent the Voting System"
-                        description="Temporary usage options including custom domain & hosting. Service ends after the period."
+                        eyebrow="Rental Ecosystem"
+                        title="Scalable Rental Options"
+                        description="Professional voting systems available for rent with full hosting and management included."
                         center
                     />
-                    <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                         {rentalPackages.map((pkg, i) => (
                             <motion.div
                                 key={pkg.name}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="rounded-3xl border border-slate-200 bg-slate-50 p-8 transition-all hover:bg-white hover:shadow-lg flex flex-col"
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
+                                className="group rounded-[2.5rem] border border-slate-200 bg-[#f8fafc] p-10 transition-all hover:bg-white hover:shadow-2xl hover:border-blue-200 flex flex-col h-full"
                             >
-                                <h4 className="text-lg font-bold text-slate-950">{pkg.name}</h4>
-                                <div className="mt-2 text-3xl font-black text-blue-600">{pkg.price}</div>
-                                <p className="mt-4 text-xs text-slate-600 leading-relaxed flex-1">{pkg.desc}</p>
+                                <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">{pkg.name}</h4>
+                                <div className="mt-4 text-4xl font-black text-slate-950 tracking-tight">{pkg.price}</div>
+                                <p className="mt-6 text-sm font-medium text-slate-500 leading-relaxed flex-1">{pkg.desc}</p>
 
-                                {paidItems[pkg.name] ? (
-                                    <a
-                                        href={createWhatsAppLink(`Here is my proof of payment for the ${pkg.name}. My brand details and idea of what I need are: `)}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-green-100 py-3 text-[10px] sm:text-xs font-bold text-green-700 transition-all hover:bg-green-200 text-center px-4 leading-tight"
-                                    >
-                                        <MessageCircle className="h-4 w-4 shrink-0" />
-                                        Send Proof of Payment to LCX STUDIOS with Brand Details
-                                    </a>
-                                ) : (
-                                    <button
-                                        onClick={() => handlePurchase(pkg)}
-                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold text-white transition-all hover:bg-blue-500 shadow-md shadow-blue-500/10"
-                                    >
-                                        <WalletCards className="h-4 w-4" />
-                                        Buy / Rent Now
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => handlePurchase(pkg)}
+                                    className="mt-10 flex w-full items-center justify-center gap-3 rounded-full bg-slate-950 py-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-600/20 active:scale-95"
+                                >
+                                    <WalletCards className="h-4 w-4" />
+                                    Reserve Now
+                                </button>
                             </motion.div>
                         ))}
                     </div>
                 </div>
 
-                <div className="h-px w-full bg-slate-200 mb-32" />
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
 
                 {/* Core Systems */}
                 <SectionHeading
-                    eyebrow="Purchases"
-                    title="Premium Software Solutions"
-                    description="Choose the package that fits your scale. Internal systems and pageantry systems are custom-coded for high-end performance."
+                    eyebrow="Acquisitions"
+                    title="Own the Full Architecture"
+                    description="Premium acquisition packages for clients who require complete ownership and long-term studio support."
                     center
                 />
 
-                <div className="mt-20 grid gap-8 lg:grid-cols-2">
+                <div className="mt-20 grid gap-10 lg:grid-cols-2">
                     {votingPackages.map((pkg, i) => (
                         <motion.div
                             key={pkg.name}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, ease: luxuryEase }}
                             className={cn(
-                                "relative flex flex-col rounded-[2.5rem] border p-10 transition-all hover:scale-[1.02] bg-white shadow-sm hover:shadow-xl",
-                                pkg.featured ? "border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.1)]" : "border-slate-200"
+                                "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
+                                pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
                             )}
                         >
-                            <div className="mb-8">
-                                <h3 className="text-2xl font-bold text-slate-950">{pkg.name}</h3>
-                                <div className="mt-4 flex items-baseline gap-2">
-                                    <span className="text-5xl font-black tracking-tight text-slate-950">{pkg.price}</span>
+                            <div className="mb-10">
+                                <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
+                                <div className="mt-6 flex items-baseline gap-2">
+                                    <span className={cn("text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
                                 </div>
-                                <p className="mt-4 text-sm text-blue-600 font-semibold">{pkg.support}</p>
+                                <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
+                                    <Sparkles className="h-3 w-3" />
+                                    {pkg.support}
+                                </div>
                             </div>
 
-                            <ul className="mb-10 flex-1 space-y-4">
+                            <ul className="mb-12 flex-1 space-y-6">
                                 {pkg.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-3 text-sm text-slate-600">
-                                        <BadgeCheck className="h-5 w-5 flex-shrink-0 text-blue-500" />
-                                        {feature}
+                                    <li key={feature} className="flex items-start gap-4 text-sm font-medium">
+                                        <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+                                            <CheckCircle2 className="h-3 w-3" />
+                                        </div>
+                                        <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
 
-                            {paidItems[pkg.name] ? (
-                                <a
-                                    href={createWhatsAppLink(`Here is my proof of payment for the ${pkg.name}. My brand details and idea of what I need are: `)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className={cn(
-                                        "flex items-center justify-center gap-2 rounded-2xl py-4 px-4 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all text-center leading-tight",
-                                        "bg-green-100 text-green-700 hover:bg-green-200"
-                                    )}
-                                >
-                                    <MessageCircle className="h-5 w-5 shrink-0" />
-                                    Send Proof of Payment to LCX STUDIOS with Brand Details
-                                </a>
-                            ) : (
-                                <button
-                                    onClick={() => handlePurchase(pkg)}
-                                    className={cn(
-                                        "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold uppercase tracking-widest transition-all",
-                                        pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-500" : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                                    )}
-                                >
-                                    <WalletCards className="h-5 w-5" />
-                                    Buy This Package
-                                </button>
-                            )}
+                            <button
+                                onClick={() => handlePurchase(pkg)}
+                                className={cn(
+                                    "flex w-full items-center justify-center gap-3 rounded-full py-6 text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl",
+                                    pkg.featured ? "bg-blue-600 text-white hover:bg-white hover:text-slate-950" : "bg-slate-950 text-white hover:bg-blue-600"
+                                )}
+                            >
+                                <WalletCards className="h-5 w-5" />
+                                Acquisition Buy-out
+                            </button>
                         </motion.div>
                     ))}
+                </div>
+            </div>
+        </section>
+    );
+}
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        className="lg:col-span-2 mt-4 relative flex flex-col md:flex-row items-center justify-between gap-8 rounded-[2.5rem] border border-slate-200 bg-slate-50 p-10 transition-all shadow-sm hover:shadow-md"
-                    >
-                        <div>
-                            <h3 className="text-2xl font-bold text-slate-950">Custom Internal Software</h3>
-                            <div className="mt-2 text-3xl font-black text-slate-700">Custom Quote</div>
-                            <p className="mt-4 text-sm text-slate-600 max-w-xl line-clamp-2">
-                                For businesses that need high-end dashboards, operations tracking, finance tools,
-                                inventory management, or tailored internal workflows.
-                            </p>
-                        </div>
-                        <a
-                            href={createWhatsAppLink("Hello, I want a custom internal software system.")}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white py-4 px-8 text-sm font-bold uppercase tracking-widest text-slate-900 transition-all hover:bg-slate-100 shrink-0 shadow-sm"
+function PosterPricing() {
+    return (
+        <section className="bg-[#020617] py-32 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1),transparent_50%)]" />
+            </div>
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <SectionHeading
+                    eyebrow="Creative Direction"
+                    title="Luxury Poster Design"
+                    description="High-end visual communication for pageantry and elite events."
+                    theme="dark"
+                    center
+                />
+
+                <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {posterPricing.map((pkg, i) => (
+                        <motion.div
+                            key={pkg.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: i * 0.1 }}
+                            className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/40 p-10 transition-all hover:bg-slate-800/60 hover:border-blue-500/30"
                         >
-                            <MessageCircle className="h-5 w-5" />
-                            Request System
-                        </a>
-                    </motion.div>
+                            <h4 className="text-sm font-black uppercase tracking-widest text-blue-400">{pkg.title}</h4>
+                            <div className="mt-4 flex items-baseline gap-1">
+                                <span className="text-4xl font-black text-white">{pkg.price}</span>
+                                <span className="text-xs font-medium text-slate-500">{pkg.note}</span>
+                            </div>
+                            <p className="mt-6 text-xs font-medium text-slate-400 leading-relaxed">{pkg.extra}</p>
+
+                            <a
+                                href={createWhatsAppLink(`Hello, I want to inquire about ${pkg.title} poster design.`)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:border-blue-500 active:scale-95"
+                            >
+                                <Palette className="h-4 w-4" />
+                                Order Visual
+                            </a>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>
@@ -853,90 +869,64 @@ function PricingCards() {
 }
 
 function Portfolio() {
-    const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [dbItems, setDbItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
 
     useEffect(() => {
-        async function fetchPortfolio() {
-            try {
-                const { data, error } = await supabase
-                    .from('portfolio_items')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                setItems(data || []);
-            } catch (err) {
-                console.error("Error fetching portfolio items", err);
-            } finally {
-                setLoading(false);
-            }
-        }
+        const fetchPortfolio = async () => {
+            const { data, error } = await supabase
+                .from('portfolio_items')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (!error && data) setDbItems(data);
+        };
         fetchPortfolio();
     }, []);
 
+    const displayItems = dbItems.length > 0 ? dbItems : portfolioItems;
+
     return (
-        <section id="portfolio" className="relative bg-[#020617] py-32">
+        <section id="portfolio" className="bg-[#020617] py-32 relative overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
-                    eyebrow="Selected Works"
-                    title="Digital case studies of premium execution."
-                    description="Explore our portfolio of voting systems, internal business tools, and award-winning creative direction."
-                    center
+                    eyebrow="Portfolio"
+                    title="Selected Works"
+                    description="A showcase of elite systems and high-end visual direction crafted by our studio."
+                    theme="dark"
                 />
 
-                {loading ? (
-                    <div className="mt-20 text-center text-slate-400 font-medium">Loading portfolio...</div>
-                ) : items.length === 0 ? (
-                    <div className="mt-20 text-center text-slate-400 font-medium">No portfolio items added yet.</div>
-                ) : (
-                    <div className="mt-20 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-                        {items.map((item, i) => (
-                            <motion.div
-                                key={item.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="group cursor-pointer"
-                                onClick={() => setSelectedItem(item)}
-                            >
-                                <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-600 bg-[#020617]">
-                                    <img
-                                        src={item.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"}
-                                        alt={item.title}
-                                        className="h-full w-full object-cover opacity-60 transition-all duration-700 group-hover:scale-110 group-hover:rotate-1 group-hover:opacity-80"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
-
-                                    {item.badge && (
-                                        <div className="absolute top-6 left-6 z-10">
-                                            <span className="rounded-full bg-cyan-400 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg">
-                                                {item.badge}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-8 z-10 transition-transform duration-300 group-hover:translate-y-[-8px]">
-                                        <div className="mb-4">
-                                            <span className="rounded-full border border-slate-500 bg-slate-900/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-1.5 w-max">
-                                                <ImageIcon size={10} /> {item.category}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">{item.title}</h3>
-                                        <p className="mt-4 text-xs font-bold uppercase tracking-widest text-cyan-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center gap-2">
-                                            View Gallery <ArrowRight size={14} />
-                                        </p>
+                <div className="mt-20 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+                    {displayItems.map((item, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
+                            className="group relative cursor-pointer"
+                            onClick={() => setSelectedItem(item)}
+                        >
+                            <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-800 bg-slate-900 shadow-2xl">
+                                <img
+                                    src={item.image_url || item.image}
+                                    alt={item.title}
+                                    className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-10">
+                                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/20 border border-blue-500/30 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-blue-400 mb-4">
+                                        {item.category}
                                     </div>
+                                    <h3 className="text-2xl font-black text-white tracking-tight">{item.title}</h3>
+                                    <p className="mt-4 text-xs font-medium text-slate-400 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                        {item.desc || item.description}
+                                    </p>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
 
-            {/* Gallery Modal */}
             <AnimatePresence>
                 {selectedItem && (
                     <motion.div
@@ -952,21 +942,21 @@ function Portfolio() {
                             <X size={24} />
                         </button>
 
-                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-slate-900 border border-slate-600 shadow-2xl custom-scrollbar flex flex-col flex-nowrap" onClick={e => e.stopPropagation()}>
+                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2rem] sm:rounded-[3rem] bg-slate-900 border border-slate-600 shadow-2xl custom-scrollbar flex flex-col flex-nowrap" onClick={e => e.stopPropagation()}>
                             <div className="p-8 md:p-12 border-b border-slate-600 shrink-0">
                                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-600 bg-slate-900/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
                                     <ImageIcon size={12} /> {selectedItem.category}
                                 </div>
                                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">{selectedItem.title}</h2>
                                 <p className="mt-6 text-slate-400 md:text-lg leading-relaxed max-w-3xl">
-                                    {selectedItem.description}
+                                    {selectedItem.desc || selectedItem.description}
                                 </p>
                             </div>
 
                             <div className="p-8 md:p-12 bg-slate-900 flex-grow">
                                 {(!selectedItem.gallery_images || selectedItem.gallery_images.length === 0) ? (
-                                    <div className="rounded-[2.5rem] border border-slate-600 border-dashed p-20 text-center text-slate-400">
-                                        No gallery images available for this project.
+                                    <div className="rounded-[2.5rem] overflow-hidden">
+                                        <img src={selectedItem.image_url || selectedItem.image} alt={selectedItem.title} className="w-full h-auto object-cover" />
                                     </div>
                                 ) : (
                                     <div className="grid gap-10 grid-cols-1">
@@ -986,72 +976,8 @@ function Portfolio() {
     );
 }
 
-function PosterPricing() {
-    return (
-        <section className="relative bg-slate-900 py-32 border-y border-slate-700">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="grid gap-20 lg:grid-cols-[0.8fr_1.2fr]">
-                    <div className="flex flex-col justify-center">
-                        <SectionHeading
-                            eyebrow="Creative Direction"
-                            title="Modern poster and logo design services."
-                            description="From finalist posters to premium logo marks. We blend aesthetics with industrial-grade branding strategy."
-                        />
 
-                        <div className="mt-12 rounded-[2.5rem] bg-amber-500/5 p-8 border border-amber-500/10 text-sm leading-8 text-amber-200/80">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
-                                    <Star className="h-5 w-5 fill-current" />
-                                </div>
-                                <div className="font-bold text-[10px] tracking-[0.3em] uppercase">Service Terms</div>
-                            </div>
-                            <p>• All designs are custom-made according to client spec.</p>
-                            <p>• Design enquiries charged at the price of 1 poster (non-refundable).</p>
-                            <p>• Final payment only after client approval of direction.</p>
-                        </div>
-                    </div>
 
-                    <div className="grid gap-6 sm:grid-cols-2">
-                        {posterPricing.map((item) => (
-                            <div key={item.title} className="glass-card rounded-[2.5rem] p-10 hover:border-white/30 transition-all flex flex-col">
-                                <h3 className="text-xl font-bold text-white">{item.title}</h3>
-                                <div className="mt-6 text-4xl font-black text-white">{item.price}</div>
-                                <div className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-400">{item.note}</div>
-                                <p className="mt-6 text-sm leading-relaxed text-slate-400 flex-grow">
-                                    {item.extra}
-                                </p>
-                                <button
-                                    onClick={() => handlePayment(parseInt(item.price.replace(/[^\d]/g, '')) * 100, item.title)}
-                                    className="mt-8 w-full rounded-2xl bg-slate-900 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95"
-                                >
-                                    Buy Now
-                                </button>
-                            </div>
-                        ))}
-
-                        <div className="sm:col-span-2 glass-card rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-r from-white/5 to-transparent">
-                            <div>
-                                <h3 className="text-2xl font-bold text-white tracking-tight">Logo & Identity Systems</h3>
-                                <p className="mt-2 text-slate-400 max-w-md">Modern concepts for brands, companies, events, and individuals starting from R5,000.</p>
-                            </div>
-                            <div className="flex flex-wrap gap-4">
-                                <button
-                                    onClick={() => handlePayment(500000, "Logo & Identity Systems")}
-                                    className="flex items-center gap-3 rounded-2xl bg-slate-900 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:scale-105 active:scale-95"
-                                >
-                                    Buy Now
-                                </button>
-                                <a href={createWhatsAppLink("Hello, I want logo design services.")} className="flex items-center gap-3 rounded-2xl border border-slate-600 bg-slate-900 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-slate-800">
-                                    WhatsApp <ArrowRight className="h-4 w-4" />
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
 
 function RequestForm() {
     const [form, setForm] = useState({
@@ -1077,8 +1003,8 @@ function RequestForm() {
     const inputClass = "mt-3 w-full rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm text-slate-900 outline-none focus:border-cyan-500 transition-all placeholder:text-slate-400 shadow-sm";
 
     return (
-        <section id="request" className="relative bg-white py-32 border-t border-slate-200">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <section id="request" className="relative bg-white py-24 sm:py-32 border-t border-slate-200">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <SectionHeading
                     eyebrow="Project Intake"
                     title="Engineered for your needs."
@@ -1086,7 +1012,7 @@ function RequestForm() {
                     center
                 />
 
-                <div className="mt-20 mx-auto max-w-4xl bg-slate-50 border border-slate-200 rounded-[3rem] p-10 lg:p-16 shadow-xl">
+                <div className="mt-12 sm:mt-20 mx-auto max-w-4xl bg-slate-50 border border-slate-200 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 lg:p-16 shadow-xl">
                     <div className="grid gap-8 md:grid-cols-2">
                         <label className="block text-xs font-bold uppercase tracking-widest text-slate-500">Full Name
                             <input className={inputClass} value={form.fullName} onChange={(e) => handleChange("fullName", e.target.value)} placeholder="Enter details..." />
@@ -1141,50 +1067,109 @@ function RequestForm() {
 
 function Contact() {
     return (
-        <section id="contact" className="relative bg-[#020617] py-32 border-t border-slate-800">
+        <section id="contact" className="relative bg-[#020617] py-32 overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="grid gap-10 lg:grid-cols-3">
-                    {[
-                        {
-                            icon: MessageCircle,
-                            title: "WhatsApp",
-                            value: "067 884 6390",
-                            href: createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services."),
-                            label: "Chat Now",
-                        },
-                        {
-                            icon: Mail,
-                            title: "Enquiries",
-                            value: EMAIL,
-                            href: `mailto:${EMAIL}`,
-                            label: "Email Us",
-                        },
-                        {
-                            icon: Building2,
-                            title: "Direct Access",
-                            value: "Custom Studio Operations",
-                            href: "#request",
-                            label: "Start Project",
-                        },
-                    ].map((item) => (
-                        <a
-                            key={item.title}
-                            href={item.href}
-                            className="group bg-slate-900 border border-slate-700/50 rounded-[3rem] p-10 transition-all hover:bg-slate-800 hover:border-slate-500 shadow-xl"
+                <div className="relative overflow-hidden rounded-[4rem] bg-gradient-to-br from-blue-600 to-blue-800 p-12 sm:p-20 shadow-2xl">
+                    <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:20px_20px]" />
+
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            className="mb-10 inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-white/20 backdrop-blur-xl text-white shadow-2xl"
                         >
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 transition-transform group-hover:scale-110">
-                                <item.icon className="h-8 w-8" />
-                            </div>
-                            <h3 className="mt-8 text-2xl font-bold text-white tracking-tight">{item.title}</h3>
-                            <p className="mt-2 font-medium text-slate-400">{item.value}</p>
-                            <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-400">
-                                {item.label} <ArrowRight className="h-4 w-4" />
-                            </div>
-                        </a>
-                    ))}
+                            <Zap className="h-12 w-12" />
+                        </motion.div>
+
+                        <h2 className="text-4xl font-black text-white sm:text-6xl tracking-tighter max-w-2xl leading-[1.05]">
+                            Ready to build your next-gen system?
+                        </h2>
+                        <p className="mt-8 text-lg font-medium text-blue-100 max-w-xl">
+                            Connect with our studio architects directly for high-priority consultations and elite software execution.
+                        </p>
+
+                        <div className="mt-12 flex flex-col sm:flex-row gap-6">
+                            <a
+                                href={createWhatsAppLink("Hello, I want to start a priority system build with LCX STUDIOS.")}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center gap-3 rounded-full bg-white px-10 py-5 text-sm font-black uppercase tracking-widest text-blue-600 transition-all hover:scale-105 active:scale-95 shadow-xl"
+                            >
+                                <MessageCircle className="h-5 w-5" />
+                                WhatsApp Priority
+                            </a>
+                            <a
+                                href={`mailto:${EMAIL}`}
+                                className="inline-flex items-center justify-center gap-3 rounded-full border border-white/30 bg-white/10 px-10 py-5 text-sm font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+                            >
+                                <Mail className="h-5 w-5" />
+                                Official Enquiry
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
+    );
+}
+
+function Footer() {
+    return (
+        <footer className="bg-[#020617] border-t border-slate-900 py-24">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="grid gap-16 lg:grid-cols-2">
+                    <div>
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 p-1.5">
+                                <img src="/logo.png" alt="LCX Footer" className="h-full w-full object-contain" />
+                            </div>
+                            <span className="text-2xl font-black tracking-tighter text-white">LCX STUDIOS</span>
+                        </div>
+                        <p className="mt-8 max-w-sm text-sm font-medium leading-relaxed text-slate-500">
+                            The technology partner for high-end digital architecture, custom internal software, and elite brand identity.
+                        </p>
+                        <div className="mt-10 flex gap-6">
+                            <a href="#" className="text-slate-500 hover:text-white transition-colors"><Phone className="h-5 w-5" /></a>
+                            <a href={`mailto:${EMAIL}`} className="text-slate-500 hover:text-white transition-colors"><Mail className="h-5 w-5" /></a>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Navigation</h4>
+                            <ul className="mt-6 space-y-4">
+                                {navItems.map(item => (
+                                    <li key={item.label}><a href={item.href} className="text-sm font-medium text-slate-500 hover:text-white transition-colors">{item.label}</a></li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Services</h4>
+                            <ul className="mt-6 space-y-4">
+                                <li><a href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-colors">Voting Systems</a></li>
+                                <li><a href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-colors">Custom Dashboards</a></li>
+                                <li><a href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-colors">Visual Posters</a></li>
+                            </ul>
+                        </div>
+                        <div className="col-span-2 sm:col-span-1">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Location</h4>
+                            <p className="mt-6 text-sm font-medium text-slate-500 leading-relaxed">
+                                Cape Town & Johannesburg,<br />South Africa
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-20 flex flex-col sm:flex-row items-center justify-between border-t border-slate-900 pt-12 gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                    <p>© {new Date().getFullYear()} LCX STUDIOS. High-End Systems Only.</p>
+                    <div className="flex gap-10">
+                        <a href="/admin" className="hover:text-blue-500 transition-colors">Studio Admin</a>
+                        <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                        <a href="#" className="hover:text-white transition-colors">Terms</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     );
 }
 
@@ -1202,9 +1187,7 @@ function SmartChatWidget() {
     };
 
     useEffect(() => {
-        if (open) {
-            scrollToBottom();
-        }
+        if (open) scrollToBottom();
     }, [messages, open]);
 
     const handleSendMessage = async (e) => {
@@ -1226,20 +1209,13 @@ function SmartChatWidget() {
                 body: JSON.stringify({ messages: [...messages, userMessage] })
             });
 
-            if (!res.ok) {
-                throw new Error("Network error or Edge Function failed");
-            }
+            if (!res.ok) throw new Error("Network error");
             const data = await res.json();
 
-            if (data.error) {
-                // Return gracefully if missing API keys
-                setMessages((prev) => [...prev, { role: "assistant", content: data.error }]);
-            } else if (data.reply) {
-                setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-            }
+            if (data.reply) setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+            else if (data.error) setMessages((prev) => [...prev, { role: "assistant", content: data.error }]);
         } catch (err) {
-            console.error("Chat error:", err);
-            setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I am having trouble connecting right now. Please try again later or contact support directly." }]);
+            setMessages((prev) => [...prev, { role: "assistant", content: "AI system is currently calibrating. Please try again later." }]);
         } finally {
             setIsLoading(false);
         }
@@ -1249,66 +1225,57 @@ function SmartChatWidget() {
         <>
             <button
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[60] flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-cyan-500 text-white shadow-2xl transition-transform hover:scale-110 active:scale-95 shadow-cyan-500/20"
+                className="fixed bottom-6 right-6 z-[60] flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-600 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all shadow-blue-600/30"
             >
                 <AnimatePresence mode="wait">
-                    {open ? <X key="x" className="h-7 w-7" /> : <Bot key="bot" className="h-7 w-7" />}
+                    {open ? <X key="x" className="h-8 w-8" /> : <Bot key="bot" className="h-8 w-8" />}
                 </AnimatePresence>
             </button>
 
             <AnimatePresence>
                 {open && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="fixed bottom-20 right-4 md:bottom-28 md:right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-600 bg-[#020617]/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[500px] md:h-[600px] max-h-[70vh]"
+                        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                        className="fixed bottom-28 right-6 z-[60] w-[min(calc(100vw-2rem),420px)] overflow-hidden rounded-[3rem] border border-slate-800 bg-[#020617]/95 shadow-2xl backdrop-blur-2xl flex flex-col h-[600px] max-h-[75vh]"
                     >
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-white shrink-0">
-                            <div className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" /> LCX AI
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-10 text-white shrink-0">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-blue-200 flex items-center gap-2">
+                                <Sparkles className="h-4 w-4" /> Studio Intelligence
                             </div>
-                            <h3 className="mt-1 text-2xl font-black tracking-tight">How can I help?</h3>
-                            <p className="mt-2 text-xs font-bold text-white/70 leading-relaxed">
-                                Ask me about pricing, services, or how to get started.
-                            </p>
+                            <h3 className="mt-2 text-3xl font-black tracking-tighter">LCX AI</h3>
                         </div>
 
-                        {/* Chat Messages Area */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[#020617]/50">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-slate-950/20">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                                     <div className={cn(
-                                        "max-w-[85%] rounded-[1.5rem] px-5 py-3.5 text-sm leading-relaxed",
-                                        msg.role === "user"
-                                            ? "bg-cyan-500 text-white font-medium rounded-tr-sm"
-                                            : "bg-slate-900 border border-slate-600 text-slate-300 shadow-sm rounded-tl-sm"
+                                        "max-w-[85%] rounded-[2rem] px-6 py-4 text-sm font-medium leading-relaxed shadow-sm",
+                                        msg.role === "user" ? "bg-blue-600 text-white" : "bg-slate-900 border border-slate-800 text-slate-300"
                                     )}>
                                         {msg.content}
                                     </div>
                                 </div>
                             ))}
-
                             {isLoading && (
                                 <div className="flex justify-start">
-                                    <div className="bg-slate-900 border border-slate-600 text-slate-400 rounded-[1.5rem] rounded-tl-sm px-5 py-4 shadow-sm flex gap-1.5 items-center">
-                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-2 h-2 rounded-full bg-slate-300" />
-                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-2 h-2 rounded-full bg-slate-300" />
-                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 rounded-full bg-slate-300" />
+                                    <div className="bg-slate-900 border border-slate-800 rounded-[2rem] px-6 py-4 flex gap-2 items-center">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" />
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]" />
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.3s]" />
                                     </div>
                                 </div>
                             )}
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
-                        <div className="p-4 bg-slate-900 border-t border-slate-700 shrink-0">
-                            <form onSubmit={handleSendMessage} className="relative flex items-center">
+                        <div className="p-6 bg-slate-900/50 border-t border-slate-800 shrink-0">
+                            <form onSubmit={handleSendMessage} className="relative">
                                 <input
                                     type="text"
-                                    className="w-full rounded-full border border-slate-600 bg-[#020617] pl-6 pr-14 py-4 text-sm text-white outline-none focus:border-cyan-400 focus:bg-slate-900 transition-all placeholder:text-slate-400"
-                                    placeholder="Type your message..."
+                                    className="w-full rounded-2xl border border-slate-800 bg-slate-950 pl-6 pr-14 py-4 text-sm text-white outline-none focus:border-blue-500 transition-all placeholder:text-slate-500"
+                                    placeholder="Type a message..."
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     disabled={isLoading}
@@ -1316,14 +1283,11 @@ function SmartChatWidget() {
                                 <button
                                     type="submit"
                                     disabled={!input.trim() || isLoading}
-                                    className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500 text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white hover:scale-105 active:scale-95 disabled:opacity-50 transition-all"
                                 >
                                     <Send className="h-4 w-4" />
                                 </button>
                             </form>
-                            <div className="mt-3 text-center text-[10px] text-slate-400 font-medium uppercase tracking-widest">
-                                AI responses may not be 100% accurate.
-                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -1332,161 +1296,111 @@ function SmartChatWidget() {
     );
 }
 
-function Footer() {
-    return (
-        <footer className="bg-[#020617] py-20 border-t border-slate-800 relative">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-                    <div className="text-center md:text-left">
-                        <div className="flex items-center gap-4 justify-center md:justify-start">
-                            <div className="h-12 w-12 rounded-xl border border-slate-700 bg-slate-900 overflow-hidden p-1">
-                                <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-contain" />
-                            </div>
-                            <div className="text-2xl font-black tracking-[0.2em] text-white">LCX STUDIOS</div>
-                        </div>
-                        <p className="mt-6 text-sm text-slate-400 max-w-sm leading-8">
-                            Premium technology and creative execution for the next generation of brands and businesses.
-                        </p>
-                    </div>
+function AdminPage() {
+    const [pin, setPin] = useState("");
+    const [authorized, setAuthorized] = useState(false);
 
-                    <div className="flex flex-wrap gap-8 justify-center">
-                        {navItems.map((item) => (
-                            <a key={item.href} href={item.href} className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
-                                {item.label}
-                            </a>
-                        ))}
+    if (!authorized) {
+        return (
+            <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="max-w-md w-full bg-slate-900 border border-slate-800 p-12 rounded-[3rem] shadow-2xl text-center"
+                >
+                    <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-600/10 text-blue-500 mb-8 border border-blue-500/20 shadow-xl">
+                        <ShieldCheck className="h-10 w-10" />
                     </div>
-                </div>
+                    <h2 className="text-3xl font-black text-white tracking-tighter">Identity Check</h2>
+                    <p className="mt-4 text-sm font-medium text-slate-400">Enter your studio access PIN to proceed.</p>
 
-                <div className="mt-20 pt-10 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
-                    <div>© {new Date().getFullYear()} LCX STUDIOS. All rights reserved.</div>
-                    <a href="/admin" className="hover:text-white transition-colors flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3" /> Admin Access
-                    </a>
-                </div>
+                    <input
+                        type="password"
+                        maxLength={4}
+                        value={pin}
+                        onChange={(e) => {
+                            setPin(e.target.value);
+                            if (e.target.value === "1965") setAuthorized(true);
+                        }}
+                        className="mt-10 w-full rounded-2xl border border-slate-800 bg-slate-950 px-10 py-6 text-center text-4xl font-black tracking-[0.5em] text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                        placeholder="••••"
+                    />
+                </motion.div>
             </div>
-        </footer>
-    );
+        );
+    }
+
+    return <Admin />;
 }
 
 export default function App() {
     const [session, setSession] = useState(null);
-    const navigate = useNavigate();
+    const [showAuth, setShowAuth] = useState(false);
+    const [showAccount, setShowAccount] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-        });
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            if (session && (location.pathname === '/login' || location.pathname === '/register')) {
-                navigate('/account');
-            }
-            if (!session && location.pathname === '/account') {
-                navigate('/login');
-            }
-        });
-
+        supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
         return () => subscription.unsubscribe();
-    }, [navigate, location.pathname]);
+    }, []);
 
     const handlePortalClick = () => {
-        if (session) {
-            navigate('/account');
-        } else {
-            navigate('/login');
-        }
+        if (!session) setShowAuth(true);
+        else setShowAccount(true);
     };
 
+    if (location.pathname === "/admin") return <AdminPage />;
+
     return (
-        <div className="min-h-screen bg-slate-900 selection:bg-slate-900 selection:text-white flex flex-col">
+        <div className="min-h-screen bg-white">
             <TopNav session={session} onPortalClick={handlePortalClick} />
+            <main>
+                <Hero />
+                <About />
+                <Services />
+                <Portfolio />
+                <PricingCards />
+                <PosterPricing />
+                <RequestForm />
+                <Contact />
+            </main>
+            <Footer />
 
-            <div className="flex-grow">
-                <AnimatePresence mode="wait">
-                    <Routes location={location} key={location.pathname}>
-                        <Route path="/" element={
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                <Hero />
-                                <About />
-                                <Services />
-                                <Portfolio />
-                                <PricingCards />
-                                <PosterPricing />
-                                <RequestForm />
-                                <Contact />
-                                <Footer />
-                            </motion.div>
-                        } />
+            <AnimatePresence>
+                {showAuth && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 p-6 backdrop-blur-2xl"
+                    >
+                        <div className="relative max-w-md w-full">
+                            <button onClick={() => setShowAuth(false)} className="absolute -top-16 right-0 text-white hover:text-blue-400">
+                                <X className="h-10 w-10" />
+                            </button>
+                            <Auth />
+                        </div>
+                    </motion.div>
+                )}
 
-                        <Route path="/login" element={
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center bg-slate-900 relative overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)]" />
-                                <Auth
-                                    defaultMode="login"
-                                    onAuthSuccess={() => navigate('/account')}
-                                    onBack={() => navigate('/')}
-                                />
-                            </motion.div>
-                        } />
-
-                        <Route path="/register" element={
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center bg-slate-900 relative overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)]" />
-                                <Auth
-                                    defaultMode="register"
-                                    onAuthSuccess={() => navigate('/account')}
-                                    onBack={() => navigate('/')}
-                                />
-                            </motion.div>
-                        } />
-
-                        <Route path="/account" element={
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20"
-                            >
-                                <Account
-                                    session={session}
-                                    onSignOut={() => navigate('/')}
-                                    onBack={() => navigate('/')}
-                                />
-                            </motion.div>
-                        } />
-
-                        <Route path="/admin" element={
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 bg-[#020617] min-h-screen"
-                            >
-                                <Admin />
-                            </motion.div>
-                        } />
-                    </Routes>
-                </AnimatePresence>
-            </div>
+                {showAccount && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 p-6 backdrop-blur-2xl"
+                    >
+                        <div className="relative max-w-4xl w-full">
+                            <button onClick={() => setShowAccount(false)} className="absolute -top-16 right-0 text-white hover:text-blue-400">
+                                <X className="h-10 w-10" />
+                            </button>
+                            <Account session={session} onSignOut={() => setShowAccount(false)} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <SmartChatWidget />
         </div>
