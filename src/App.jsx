@@ -284,27 +284,36 @@ function createWhatsAppLink(message) {
 }
 
 // ---------- YOCO PAY BUTTON COMPONENT (new redirect-based Checkout API) ----------
-function YocoPayButton({ amountInCents, description, onSuccess, label }) {
+function YocoPayButton({ amountInCents, description, onSuccess, label, onLoginRequired }) {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('idle'); // idle | initializing | verifying
+    const [isLoggedIn, setIsLoggedIn] = useState(null); // null = checking
 
-    // Auto-verify on return from Yoco payment page
+    // Check session + auto-verify on return from Yoco
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const isReturning = params.get('yoco_return') === '1';
-        const saved = JSON.parse(localStorage.getItem('pendingYocoPurchase') || '{}');
-        if (isReturning && saved.checkoutId && saved.description === description && status === 'idle') {
-            verifyPayment(saved.checkoutId, saved.description, saved.userId);
-        }
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setIsLoggedIn(!!session);
+            const params = new URLSearchParams(window.location.search);
+            const isReturning = params.get('yoco_return') === '1';
+            const saved = JSON.parse(localStorage.getItem('pendingYocoPurchase') || '{}');
+            if (isReturning && saved.checkoutId && saved.description === description) {
+                verifyPayment(saved.checkoutId, saved.description, saved.userId);
+            }
+        });
     }, []);
 
     const handlePay = async () => {
+        // Re-check session at click time — block if not logged in
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            if (onLoginRequired) onLoginRequired();
+            else alert('Please log in or register to make a purchase.');
+            return;
+        }
         setLoading(true);
         setStatus('initializing');
         try {
-            // Get current user session to link purchase to account
-            const { data: { session } } = await supabase.auth.getSession();
-            const userId = session?.user?.id || null;
+            const userId = session.user.id;
 
             const returnUrl = window.location.origin + window.location.pathname + '?yoco_return=1';
             const { data, error } = await supabase.functions.invoke('verify-yoco', {
@@ -363,16 +372,38 @@ function YocoPayButton({ amountInCents, description, onSuccess, label }) {
         }
     };
 
+    // --- NOT LOGGED IN: Show login gate ---
+    if (isLoggedIn === false) {
+        return (
+            <div className="w-full space-y-3">
+                <div className="flex items-center gap-3 mb-1">
+                    <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>
+                </div>
+                <button
+                    onClick={() => onLoginRequired ? onLoginRequired() : alert('Please log in to purchase.')}
+                    className="w-full flex items-center justify-center gap-3 rounded-full bg-blue-600 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-500 hover:shadow-xl active:scale-95 shadow-lg"
+                >
+                    <User className="h-5 w-5" />
+                    Login to Purchase
+                </button>
+                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
+                    <ShieldCheck className="h-3 w-3 text-green-500" />
+                    Login or register — it's free
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full space-y-3">
-            {/* LCX Logo above button */}
             <div className="flex items-center gap-3 mb-1">
                 <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
                 <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>
             </div>
             <button
                 onClick={handlePay}
-                disabled={loading}
+                disabled={loading || isLoggedIn === null}
                 className="w-full flex items-center justify-center gap-3 rounded-full bg-slate-950 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-600/20 active:scale-95 disabled:opacity-70 shadow-lg"
             >
                 {loading ? (

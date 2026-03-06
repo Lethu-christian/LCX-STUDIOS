@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Globe, Shield, Search, MoreVertical, ArrowLeft,
     LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X,
-    Upload, Code2, ShieldCheck, Palette, Settings, CheckCircle2, AlertCircle
+    Upload, Code2, ShieldCheck, Palette, Settings, CheckCircle2, AlertCircle,
+    WalletCards, RefreshCcw, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -97,6 +98,7 @@ export default function Admin() {
     const [pinInput, setPinInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
+    const [purchases, setPurchases] = useState([]);
     const [toast, setToast] = useState(null);
     const navigate = useNavigate();
 
@@ -141,16 +143,18 @@ export default function Admin() {
     async function fetchData() {
         setLoading(true);
         try {
-            const [profilesRes, sitesRes, portfolioRes, servicesRes] = await Promise.all([
+            const [profilesRes, sitesRes, portfolioRes, servicesRes, purchasesRes] = await Promise.all([
                 supabase.from('profiles').select('*').order('updated_at', { ascending: false }),
                 supabase.from('sites').select('*, profiles(full_name)').order('created_at', { ascending: false }),
                 supabase.from('portfolio_items').select('*').order('created_at', { ascending: false }),
                 supabase.from('services').select('*').order('display_order', { ascending: true }),
+                supabase.from('purchases').select('*, profiles(full_name, username)').order('created_at', { ascending: false }),
             ]);
             setProfiles(profilesRes.data || []);
             setSites(sitesRes.data || []);
             setPortfolioItems(portfolioRes.data || []);
             setServices(servicesRes.data || []);
+            setPurchases(purchasesRes.data || []);
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
@@ -292,6 +296,7 @@ export default function Admin() {
         { id: 'overview', label: 'Overview' },
         { id: 'portfolio', label: 'Portfolio' },
         { id: 'services', label: 'Services' },
+        { id: 'purchases', label: `Purchases ${purchases.length > 0 ? `(${purchases.length})` : ''}` },
     ];
 
     return (
@@ -532,6 +537,90 @@ export default function Admin() {
                                     ))}
                                 </div>
                             )}
+                    </motion.div>
+                )}
+                {/* ---- PURCHASES TAB ---- */}
+                {activeTab === 'purchases' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                                    <WalletCards className="text-green-500" /> Customer Purchases
+                                </h2>
+                                <p className="text-slate-400 text-sm mt-1">Every payment recorded from your website — linked to customer accounts.</p>
+                            </div>
+                            <button onClick={fetchData} className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all font-bold text-sm">
+                                <RefreshCcw size={16} /> Refresh
+                            </button>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <StatCard icon={<WalletCards className="text-green-500" />} label="Total Sales" value={purchases.length} />
+                            <StatCard icon={<FileText className="text-blue-500" />} label="Total Revenue" value={`R${purchases.reduce((sum, p) => sum + (Number(p.amount) || 0), 0).toLocaleString('en-ZA')}`} />
+                            <StatCard icon={<Users className="text-purple-500" />} label="Unique Buyers" value={new Set(purchases.map(p => p.user_id).filter(Boolean)).size} />
+                        </div>
+
+                        {/* Purchases Table */}
+                        <div className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table className="w-full text-left min-w-[700px]">
+                                <thead className="bg-[#020617] border-b border-slate-700">
+                                    <tr>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Date</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Client</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Description</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Amount</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-center">Status</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800">
+                                    {loading ? (
+                                        <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-400">Loading purchases...</td></tr>
+                                    ) : purchases.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-16 text-center">
+                                                <WalletCards size={40} className="mx-auto mb-4 text-slate-600" />
+                                                <p className="text-slate-400 font-bold">No purchases yet</p>
+                                                <p className="text-slate-500 text-sm mt-1">Purchases will appear here after customers pay.</p>
+                                                <p className="text-slate-600 text-xs mt-2">Make sure you ran the purchases SQL in Supabase.</p>
+                                            </td>
+                                        </tr>
+                                    ) : purchases.map(purchase => (
+                                        <tr key={purchase.id} className="hover:bg-slate-800/40 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-slate-400 whitespace-nowrap">
+                                                {new Date(purchase.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                                                        <Users size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-white text-sm">{purchase.profiles?.full_name || 'Guest'}</div>
+                                                        <div className="text-xs text-slate-500">@{purchase.profiles?.username || 'unknown'}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-semibold text-white">{purchase.description}</td>
+                                            <td className="px-6 py-4 text-right">
+                                                <span className="font-black text-white text-base">R{Number(purchase.amount).toLocaleString('en-ZA')}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                                    purchase.status === 'success' ? "bg-green-900/40 text-green-400 border border-green-500/20" : "bg-amber-900/40 text-amber-400 border border-amber-500/20"
+                                                )}>
+                                                    {purchase.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-mono text-xs text-slate-500">{purchase.reference?.substring(0, 20)}…</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </motion.div>
                 )}
 
