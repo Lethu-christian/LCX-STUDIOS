@@ -513,15 +513,15 @@ function Hero() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="mt-12 flex flex-wrap gap-5"
+                        className="mt-12 flex flex-col sm:flex-row flex-wrap gap-5"
                     >
-                        <a href="#services" className="group relative overflow-hidden rounded-full bg-slate-900 px-8 py-5 text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-xl hover:bg-slate-800">
+                        <a href="#services" className="group relative overflow-hidden rounded-full bg-slate-900 px-8 py-5 text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-xl hover:bg-slate-800 text-center">
                             View Services
                         </a>
-                        <a href="#pricing" className="rounded-full border border-slate-200 px-8 py-5 text-sm font-bold text-slate-900 transition-all hover:bg-slate-50">
+                        <a href="#pricing" className="rounded-full border border-slate-200 px-8 py-5 text-sm font-bold text-slate-900 transition-all hover:bg-slate-50 text-center">
                             Buy a Service
                         </a>
-                        <a href="#request" className="flex items-center gap-2 px-4 py-5 font-bold text-slate-900 transition-colors hover:text-slate-600">
+                        <a href="#request" className="flex items-center justify-center gap-2 px-4 py-5 font-bold text-slate-900 transition-colors hover:text-slate-600">
                             Request System <ArrowRight className="h-4 w-4" />
                         </a>
                     </motion.div>
@@ -1249,7 +1249,7 @@ function SmartChatWidget() {
         <>
             <button
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-8 right-8 z-[60] flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500 text-white shadow-2xl transition-transform hover:scale-110 active:scale-95 shadow-cyan-500/20"
+                className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[60] flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-cyan-500 text-white shadow-2xl transition-transform hover:scale-110 active:scale-95 shadow-cyan-500/20"
             >
                 <AnimatePresence mode="wait">
                     {open ? <X key="x" className="h-7 w-7" /> : <Bot key="bot" className="h-7 w-7" />}
@@ -1262,7 +1262,7 @@ function SmartChatWidget() {
                         initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="fixed bottom-28 right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-600 bg-[#020617]/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[600px] max-h-[70vh]"
+                        className="fixed bottom-20 right-4 md:bottom-28 md:right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-600 bg-[#020617]/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[500px] md:h-[600px] max-h-[70vh]"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-white shrink-0">
