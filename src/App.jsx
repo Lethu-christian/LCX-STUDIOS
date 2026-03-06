@@ -381,11 +381,11 @@ function TopNav({ session, onPortalClick }) {
     return (
         <header className={cn(
             "fixed top-0 z-50 w-full transition-all duration-500",
-            scrolled ? "bg-white/80 border-b border-slate-200 py-3 sm:py-4 backdrop-blur-xl" : "bg-transparent py-6 sm:py-8"
+            scrolled ? "bg-white/40 border-b border-slate-200/50 py-3 sm:py-4 backdrop-blur-3xl shadow-lg" : "bg-transparent py-6 sm:py-8"
         )}>
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-8">
                 <a href="#home" className="flex items-center gap-4 transition-transform hover:scale-105 active:scale-95">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden p-1.5">
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/50 bg-white/40 backdrop-blur-md shadow-sm overflow-hidden p-1.5">
                         <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-contain" />
                     </div>
                 </a>
@@ -401,7 +401,7 @@ function TopNav({ session, onPortalClick }) {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onPortalClick}
-                        className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition hover:bg-slate-50 md:inline-flex shadow-sm hover:shadow-md active:scale-95"
+                        className="hidden items-center gap-2 rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition hover:bg-white/60 md:inline-flex shadow-sm hover:shadow-md active:scale-95"
                     >
                         {session ? <LayoutDashboard className="h-4 w-4" /> : <User className="h-4 w-4" />}
                         {session ? "Portal" : "Join Platform"}
@@ -409,7 +409,7 @@ function TopNav({ session, onPortalClick }) {
 
                     <button
                         onClick={() => setOpen(!open)}
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-950 transition hover:bg-slate-50 md:hidden shadow-sm"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/50 bg-white/40 backdrop-blur-md text-slate-950 transition hover:bg-white/60 md:hidden shadow-sm"
                     >
                         {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </button>
@@ -465,7 +465,7 @@ function Hero() {
                         variants={fadeUpVariant}
                         initial="hidden"
                         animate="visible"
-                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.4em] text-slate-950 shadow-sm w-fit"
+                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.4em] text-slate-950 shadow-sm w-fit"
                     >
                         <div className="relative flex h-2 w-2">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75"></span>
@@ -542,7 +542,7 @@ function Hero() {
                                 rotateY: [0, 8, 0],
                             }}
                             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                            className="relative z-10 flex h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] items-center justify-center rounded-[4rem] border border-slate-200 bg-white p-12 shadow-[0_40px_100px_rgba(0,0,0,0.08)] backdrop-blur-2xl transition-all group-hover:border-slate-300 group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.12)]"
+                            className="relative z-10 flex h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] items-center justify-center rounded-[4rem] border border-slate-200 bg-white/40 backdrop-blur-3xl p-12 shadow-[0_40px_100px_rgba(0,0,0,0.08)] transition-all group-hover:border-slate-300 group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.12)]"
                         >
                             <img
                                 src="/logo.png"
@@ -668,7 +668,7 @@ function Services() {
                             transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
                             className="group relative rounded-[3rem] p-1 sm:p-1.5 transition-all hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)]"
                         >
-                            <div className="relative overflow-hidden rounded-[2.8rem] bg-white border border-slate-200 p-8 sm:p-12 h-full">
+                            <div className="relative overflow-hidden rounded-[2.8rem] bg-white/40 border border-slate-200/50 p-8 sm:p-12 h-full backdrop-blur-3xl shadow-xl transition-all group-hover:bg-white/60 group-hover:border-slate-300">
                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-8">
                                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20">
                                         <service.icon className="h-8 w-8" />
@@ -677,7 +677,7 @@ function Services() {
                                         href={createWhatsAppLink(service.whatsapp)}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="rounded-full border border-slate-200 bg-white px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
+                                        className="rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
                                     >
                                         Inquire <ChevronRight className="ml-2 h-4 w-4" />
                                     </a>
@@ -738,7 +738,7 @@ function PricingCards() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
-                                className="group rounded-[2.5rem] border border-slate-200 bg-[#f8fafc] p-10 transition-all hover:bg-white hover:shadow-2xl hover:border-blue-200 flex flex-col h-full"
+                                className="group rounded-[2.5rem] border border-slate-200/50 bg-white/30 p-10 backdrop-blur-3xl transition-all hover:bg-white/60 hover:shadow-2xl hover:border-blue-200 flex flex-col h-full shadow-lg"
                             >
                                 <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">{pkg.name}</h4>
                                 <div className="mt-4 text-4xl font-black text-slate-950 tracking-tight">{pkg.price}</div>
@@ -820,6 +820,16 @@ function PricingCards() {
 }
 
 function PosterPricing() {
+    const handlePosterPurchase = (pkg) => {
+        const amountString = pkg.price.replace(/[^0-9]/g, '');
+        const amountInCents = parseInt(amountString, 10) * 100;
+
+        handlePayment(amountInCents, `Purchase: ${pkg.title}`, () => {
+            const message = `Hello LCX STUDIOS. I have just paid ${pkg.price} for the ${pkg.title}. Here are my details for the design...`;
+            window.open(createWhatsAppLink(message), '_blank');
+        });
+    };
+
     return (
         <section className="bg-[#020617] py-32 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
@@ -842,7 +852,7 @@ function PosterPricing() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8, delay: i * 0.1 }}
-                            className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/40 p-10 transition-all hover:bg-slate-800/60 hover:border-blue-500/30"
+                            className="group relative rounded-[2.5rem] border border-slate-800 bg-slate-900/40 p-10 backdrop-blur-xl transition-all hover:bg-slate-800/60 hover:border-blue-500/30 shadow-2xl"
                         >
                             <h4 className="text-sm font-black uppercase tracking-widest text-blue-400">{pkg.title}</h4>
                             <div className="mt-4 flex items-baseline gap-1">
@@ -851,15 +861,13 @@ function PosterPricing() {
                             </div>
                             <p className="mt-6 text-xs font-medium text-slate-400 leading-relaxed">{pkg.extra}</p>
 
-                            <a
-                                href={createWhatsAppLink(`Hello, I want to inquire about ${pkg.title} poster design.`)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:border-blue-500 active:scale-95"
+                            <button
+                                onClick={() => handlePosterPurchase(pkg)}
+                                className="mt-10 flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900/50 backdrop-blur-md py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:border-blue-500 active:scale-95 shadow-xl"
                             >
-                                <Palette className="h-4 w-4" />
-                                Order Visual
-                            </a>
+                                <WalletCards className="h-4 w-4" />
+                                Buy & Design
+                            </button>
                         </motion.div>
                     ))}
                 </div>
@@ -908,7 +916,7 @@ function Portfolio() {
                         >
                             <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-800 bg-slate-900 shadow-2xl">
                                 <img
-                                    src={item.image_url || item.image}
+                                    src={item.cover_image || item.image_url || item.image}
                                     alt={item.title}
                                     className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
                                 />
@@ -952,11 +960,10 @@ function Portfolio() {
                                     {selectedItem.desc || selectedItem.description}
                                 </p>
                             </div>
-
                             <div className="p-8 md:p-12 bg-slate-900 flex-grow">
                                 {(!selectedItem.gallery_images || selectedItem.gallery_images.length === 0) ? (
                                     <div className="rounded-[2.5rem] overflow-hidden">
-                                        <img src={selectedItem.image_url || selectedItem.image} alt={selectedItem.title} className="w-full h-auto object-cover" />
+                                        <img src={selectedItem.cover_image || selectedItem.image_url || selectedItem.image} alt={selectedItem.title} className="w-full h-auto object-cover" />
                                     </div>
                                 ) : (
                                     <div className="grid gap-10 grid-cols-1">
@@ -1396,7 +1403,7 @@ export default function App() {
                             <button onClick={() => setShowAccount(false)} className="absolute -top-16 right-0 text-white hover:text-blue-400">
                                 <X className="h-10 w-10" />
                             </button>
-                            <Account session={session} onSignOut={() => setShowAccount(false)} />
+                            <Account session={session} onSignOut={() => setShowAccount(false)} onBack={() => setShowAccount(false)} />
                         </div>
                     </motion.div>
                 )}
