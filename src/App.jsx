@@ -675,14 +675,6 @@ function Hero() {
                                 alt="LCX Studio Large Logo"
                                 className="h-full w-full object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-transform duration-700 group-hover:scale-110"
                             />
-
-                            {/* Floating Accents */}
-                            <div className="absolute -top-6 -right-6 h-20 w-20 rounded-3xl bg-blue-600 shadow-lg flex items-center justify-center text-white">
-                                <Sparkles className="h-10 w-10" />
-                            </div>
-                            <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-[2.5rem] border border-slate-200 bg-white shadow-xl flex items-center justify-center p-6">
-                                <Bot className="h-full w-full text-blue-600" />
-                            </div>
                         </motion.div>
                     </div>
                 </motion.div>
@@ -1520,11 +1512,11 @@ export default function App() {
             <TopNav session={session} onPortalClick={handlePortalClick} />
             <main>
                 <Hero />
-                <About />
-                <Services />
-                <Portfolio />
                 <PricingCards />
                 <PosterPricing />
+                <Portfolio />
+                <About />
+                <Services />
                 <RequestForm />
                 <Contact />
             </main>
