@@ -143,18 +143,26 @@ export default function Admin() {
     async function fetchData() {
         setLoading(true);
         try {
-            const [profilesRes, sitesRes, portfolioRes, servicesRes, purchasesRes] = await Promise.all([
+            // Fetch profiles, sites, portfolio, services normally
+            const [profilesRes, sitesRes, portfolioRes, servicesRes] = await Promise.all([
                 supabase.from('profiles').select('*').order('updated_at', { ascending: false }),
                 supabase.from('sites').select('*, profiles(full_name)').order('created_at', { ascending: false }),
                 supabase.from('portfolio_items').select('*').order('created_at', { ascending: false }),
                 supabase.from('services').select('*').order('display_order', { ascending: true }),
-                supabase.from('purchases').select('*, profiles(full_name, username)').order('created_at', { ascending: false }),
             ]);
             setProfiles(profilesRes.data || []);
             setSites(sitesRes.data || []);
             setPortfolioItems(portfolioRes.data || []);
             setServices(servicesRes.data || []);
-            setPurchases(purchasesRes.data || []);
+
+            // Fetch purchases via edge function (service role — bypasses RLS entirely)
+            const { data: purchasesData, error: purchasesErr } = await supabase.functions.invoke('admin-purchases');
+            if (!purchasesErr && purchasesData?.purchases) {
+                setPurchases(purchasesData.purchases);
+            } else {
+                console.warn('Purchases fetch failed:', purchasesErr?.message || purchasesData?.error);
+                setPurchases([]);
+            }
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
@@ -597,8 +605,9 @@ export default function Admin() {
                                                         <Users size={16} />
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-white text-sm">{purchase.profiles?.full_name || 'Guest'}</div>
-                                                        <div className="text-xs text-slate-500">@{purchase.profiles?.username || 'unknown'}</div>
+                                                        <div className="font-bold text-white text-sm">{purchase.profile?.full_name || 'Guest'}</div>
+                                                        <div className="text-xs text-slate-500">@{purchase.profile?.username || 'unknown'}</div>
+                                                        {purchase.profile?.email && <div className="text-[10px] text-slate-600">{purchase.profile.email}</div>}
                                                     </div>
                                                 </div>
                                             </td>
