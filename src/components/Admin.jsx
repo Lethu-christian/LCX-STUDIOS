@@ -1,41 +1,129 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Globe, Shield, Search, MoreVertical, ArrowLeft,
-    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X
+    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X,
+    Upload, Code2, ShieldCheck, Palette, Settings, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+function cn(...classes) { return classes.filter(Boolean).join(' '); }
+
+// ---------- SUPABASE IMAGE UPLOAD HELPER ----------
+async function uploadImageToSupabase(file, bucket = 'portfolio') {
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(fileName, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    return data.publicUrl;
+}
+
+// ---------- IMAGE UPLOAD FIELD ----------
+function ImageUploadField({ label, value, onChange, multiple = false }) {
+    const inputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleFiles = async (files) => {
+        if (!files || files.length === 0) return;
+        setUploading(true);
+        setError(null);
+        try {
+            const uploads = await Promise.all(Array.from(files).map(f => uploadImageToSupabase(f)));
+            if (multiple) {
+                const current = value ? value.split('\n').filter(Boolean) : [];
+                onChange([...current, ...uploads].join('\n'));
+            } else {
+                onChange(uploads[0]);
+            }
+        } catch (err) {
+            setError('Upload failed: ' + err.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">{label}</label>
+            {/* Preview */}
+            {!multiple && value && (
+                <div className="mb-3 relative group w-full h-40 rounded-2xl overflow-hidden border border-slate-600">
+                    <img src={value} alt="preview" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => onChange('')} className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+            {multiple && value && value.split('\n').filter(Boolean).map((url, i) => (
+                <div key={i} className="mb-2 relative group flex items-center gap-2">
+                    <img src={url} alt={`gallery-${i}`} className="w-16 h-16 object-cover rounded-xl border border-slate-600 shrink-0" />
+                    <span className="text-xs text-slate-400 truncate flex-1">{url}</span>
+                    <button type="button" onClick={() => {
+                        const arr = value.split('\n').filter(Boolean);
+                        arr.splice(i, 1);
+                        onChange(arr.join('\n'));
+                    }} className="text-red-400 hover:text-red-300 shrink-0"><X size={14} /></button>
+                </div>
+            ))}
+
+            {/* Upload Zone */}
+            <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                disabled={uploading}
+                className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-600 rounded-2xl py-6 text-slate-400 hover:border-blue-500 hover:text-blue-400 transition-all text-sm font-bold"
+            >
+                {uploading ? <span className="animate-pulse">Uploading…</span> : (
+                    <><Upload size={20} /><span>Click to upload from your PC</span><span className="text-[10px] font-normal text-slate-500">PNG, JPG, WEBP</span></>
+                )}
+            </button>
+            <input ref={inputRef} type="file" accept="image/*" multiple={multiple} className="hidden" onChange={e => handleFiles(e.target.files)} />
+            {error && <p className="text-red-400 text-xs mt-2 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
+        </div>
+    );
+}
+
+// ---------- MAIN ADMIN COMPONENT ----------
 export default function Admin() {
     const [loading, setLoading] = useState(false);
     const [profiles, setProfiles] = useState([]);
     const [sites, setSites] = useState([]);
     const [portfolioItems, setPortfolioItems] = useState([]);
+    const [services, setServices] = useState([]);
     const [isPinVerified, setIsPinVerified] = useState(false);
     const [pinInput, setPinInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
+    const [toast, setToast] = useState(null);
     const navigate = useNavigate();
 
     // Portfolio Modal State
-    const [showModal, setShowModal] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const [form, setForm] = useState({
-        title: '',
-        category: 'Voting Platform',
-        description: '',
-        badge: '',
-        cover_image: '',
-        gallery_images: ''
+    const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+    const [editingPortfolioId, setEditingPortfolioId] = useState(null);
+    const [portfolioForm, setPortfolioForm] = useState({
+        title: '', category: 'Voting Platform', description: '', badge: '',
+        cover_image: '', gallery_images: ''
     });
+
+    // Service Modal State
+    const [showServiceModal, setShowServiceModal] = useState(false);
+    const [editingServiceId, setEditingServiceId] = useState(null);
+    const [serviceForm, setServiceForm] = useState({
+        title: '', description: '', icon: 'Code2', badge: '',
+        points: '', whatsapp_msg: '', cover_image: '', display_order: 0
+    });
+
+    const showToast = (msg, type = 'success') => {
+        setToast({ msg, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         const savedPin = localStorage.getItem('adminPin');
-        if (savedPin === '1965') {
-            setIsPinVerified(true);
-            fetchData();
-        }
+        if (savedPin === '1965') { setIsPinVerified(true); fetchData(); }
     }, []);
 
     const handlePinSubmit = (e) => {
@@ -53,15 +141,16 @@ export default function Admin() {
     async function fetchData() {
         setLoading(true);
         try {
-            const [profilesRes, sitesRes, portfolioRes] = await Promise.all([
+            const [profilesRes, sitesRes, portfolioRes, servicesRes] = await Promise.all([
                 supabase.from('profiles').select('*').order('updated_at', { ascending: false }),
                 supabase.from('sites').select('*, profiles(full_name)').order('created_at', { ascending: false }),
-                supabase.from('portfolio_items').select('*').order('created_at', { ascending: false })
+                supabase.from('portfolio_items').select('*').order('created_at', { ascending: false }),
+                supabase.from('services').select('*').order('display_order', { ascending: true }),
             ]);
-
             setProfiles(profilesRes.data || []);
             setSites(sitesRes.data || []);
             setPortfolioItems(portfolioRes.data || []);
+            setServices(servicesRes.data || []);
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
@@ -74,63 +163,106 @@ export default function Admin() {
         p.username?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Portfolio Actions
+    // ---- PORTFOLIO ACTIONS ----
     const handlePortfolioSubmit = async (e) => {
         e.preventDefault();
-        const galleryArray = form.gallery_images.split('\n').map(s => s.trim()).filter(s => s !== '');
-
+        const galleryArray = portfolioForm.gallery_images.split('\n').map(s => s.trim()).filter(Boolean);
         const payload = {
-            title: form.title,
-            category: form.category,
-            description: form.description,
-            badge: form.badge,
-            cover_image: form.cover_image,
-            gallery_images: galleryArray
+            title: portfolioForm.title, category: portfolioForm.category,
+            description: portfolioForm.description, badge: portfolioForm.badge,
+            cover_image: portfolioForm.cover_image, gallery_images: galleryArray
         };
-
         try {
-            if (editingId) {
-                await supabase.from('portfolio_items').update(payload).eq('id', editingId);
+            if (editingPortfolioId) {
+                await supabase.from('portfolio_items').update(payload).eq('id', editingPortfolioId);
             } else {
                 await supabase.from('portfolio_items').insert([payload]);
             }
-            setShowModal(false);
+            setShowPortfolioModal(false);
             fetchData();
+            showToast(editingPortfolioId ? 'Portfolio item updated!' : 'Portfolio item created!');
         } catch (error) {
             console.error("Error saving portfolio item:", error);
-            alert("Failed to save portfolio item. Ensure you ran the SQL script.");
+            showToast("Failed to save. Check Supabase connection.", 'error');
         }
     };
 
-    const editItem = (item) => {
-        setEditingId(item.id);
-        setForm({
-            title: item.title,
-            category: item.category,
-            description: item.description || '',
-            badge: item.badge || '',
+    const editPortfolioItem = (item) => {
+        setEditingPortfolioId(item.id);
+        setPortfolioForm({
+            title: item.title, category: item.category,
+            description: item.description || '', badge: item.badge || '',
             cover_image: item.cover_image || '',
             gallery_images: (item.gallery_images || []).join('\n')
         });
-        setShowModal(true);
+        setShowPortfolioModal(true);
     };
 
-    const deleteItem = async (id) => {
+    const deletePortfolioItem = async (id) => {
         if (!window.confirm("Delete this portfolio item?")) return;
+        await supabase.from('portfolio_items').delete().eq('id', id);
+        fetchData();
+        showToast('Portfolio item deleted.');
+    };
+
+    const openCreatePortfolioModal = () => {
+        setEditingPortfolioId(null);
+        setPortfolioForm({ title: '', category: 'Voting Platform', description: '', badge: '', cover_image: '', gallery_images: '' });
+        setShowPortfolioModal(true);
+    };
+
+    // ---- SERVICE ACTIONS ----
+    const handleServiceSubmit = async (e) => {
+        e.preventDefault();
+        const pointsArray = serviceForm.points.split('\n').map(s => s.trim()).filter(Boolean);
+        const payload = {
+            title: serviceForm.title, description: serviceForm.description,
+            icon: serviceForm.icon, badge: serviceForm.badge,
+            points: pointsArray, whatsapp_msg: serviceForm.whatsapp_msg,
+            cover_image: serviceForm.cover_image,
+            display_order: parseInt(serviceForm.display_order) || 0
+        };
         try {
-            await supabase.from('portfolio_items').delete().eq('id', id);
+            if (editingServiceId) {
+                await supabase.from('services').update(payload).eq('id', editingServiceId);
+            } else {
+                await supabase.from('services').insert([payload]);
+            }
+            setShowServiceModal(false);
             fetchData();
+            showToast(editingServiceId ? 'Service updated!' : 'Service created!');
         } catch (error) {
-            console.error("Delete failed", error);
+            console.error("Error saving service:", error);
+            showToast("Failed to save service. Ensure the `services` table exists in Supabase.", 'error');
         }
     };
 
-    const openCreateModal = () => {
-        setEditingId(null);
-        setForm({ title: '', category: 'Voting Platform', description: '', badge: '', cover_image: '', gallery_images: '' });
-        setShowModal(true);
+    const editService = (svc) => {
+        setEditingServiceId(svc.id);
+        setServiceForm({
+            title: svc.title, description: svc.description || '',
+            icon: svc.icon || 'Code2', badge: svc.badge || '',
+            points: (svc.points || []).join('\n'), whatsapp_msg: svc.whatsapp_msg || '',
+            cover_image: svc.cover_image || '',
+            display_order: svc.display_order || 0
+        });
+        setShowServiceModal(true);
     };
 
+    const deleteService = async (id) => {
+        if (!window.confirm("Delete this service?")) return;
+        await supabase.from('services').delete().eq('id', id);
+        fetchData();
+        showToast('Service deleted.');
+    };
+
+    const openCreateServiceModal = () => {
+        setEditingServiceId(null);
+        setServiceForm({ title: '', description: '', icon: 'Code2', badge: '', points: '', whatsapp_msg: '', cover_image: '', display_order: services.length });
+        setShowServiceModal(true);
+    };
+
+    // ---- PIN SCREEN ----
     if (!isPinVerified) {
         return (
             <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white text-center">
@@ -141,14 +273,9 @@ export default function Admin() {
                     <h1 className="text-2xl font-bold mb-2">Admin Control Center</h1>
                     <p className="text-slate-400 mb-8 text-sm">Please enter the master security PIN to authorize access.</p>
                     <form onSubmit={handlePinSubmit} className="space-y-4">
-                        <input
-                            type="password"
-                            placeholder="Enter PIN"
+                        <input type="password" placeholder="Enter PIN"
                             className="w-full text-center tracking-[0.5em] text-2xl font-black bg-[#020617] border border-slate-700 rounded-xl py-4 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-600 placeholder:text-base placeholder:tracking-normal placeholder:font-normal transition-all"
-                            value={pinInput}
-                            onChange={(e) => setPinInput(e.target.value)}
-                            autoFocus
-                        />
+                            value={pinInput} onChange={(e) => setPinInput(e.target.value)} autoFocus />
                         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-500/20">
                             Unlock Dashboard
                         </button>
@@ -161,13 +288,31 @@ export default function Admin() {
         );
     }
 
+    const tabs = [
+        { id: 'overview', label: 'Overview' },
+        { id: 'portfolio', label: 'Portfolio' },
+        { id: 'services', label: 'Services' },
+    ];
+
     return (
         <div className="min-h-screen bg-[#020617] text-white">
+            {/* Toast */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                        className={cn("fixed top-6 right-6 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl text-sm font-bold",
+                            toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white')}>
+                        {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                        {toast.msg}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header */}
-            <div className="bg-slate-900 text-white p-6 sticky top-0 z-40 shadow-xl">
+            <div className="bg-slate-900 text-white p-4 sm:p-6 sticky top-0 z-40 shadow-xl border-b border-slate-800">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/')} className="p-2 rounded-xl bg-slate-900/5 hover:bg-slate-900/10 transition-all">
+                        <button onClick={() => navigate('/')} className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-all">
                             <ArrowLeft size={20} />
                         </button>
                         <div>
@@ -175,243 +320,333 @@ export default function Admin() {
                             <h1 className="text-xl font-bold">Admin Dashboard</h1>
                         </div>
                     </div>
-                    <div className="flex bg-slate-900/10 p-1 rounded-2xl overflow-x-auto no-scrollbar max-w-full">
-                        <button
-                            className={cn("whitespace-nowrap px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'overview' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
-                            onClick={() => setActiveTab('overview')}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            className={cn("whitespace-nowrap px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'portfolio' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
-                            onClick={() => setActiveTab('portfolio')}
-                        >
-                            Portfolio Manager
-                        </button>
+                    <div className="flex bg-slate-800 p-1 rounded-2xl overflow-x-auto gap-1">
+                        {tabs.map(tab => (
+                            <button key={tab.id}
+                                className={cn("whitespace-nowrap px-4 sm:px-6 py-2 rounded-xl text-sm font-bold transition-all",
+                                    activeTab === tab.id ? "bg-blue-600 text-white shadow" : "text-white/60 hover:text-white")}
+                                onClick={() => setActiveTab(tab.id)}>
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            <main className="max-w-7xl mx-auto p-6 md:p-10">
-                {activeTab === 'overview' ? (
+            <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-10">
+
+                {/* ---- OVERVIEW TAB ---- */}
+                {activeTab === 'overview' && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
                             <StatCard icon={<Users className="text-blue-500" />} label="Total Users" value={profiles.length} />
                             <StatCard icon={<Globe className="text-cyan-500" />} label="Site Requests" value={sites.length} />
                             <StatCard icon={<LayoutDashboard className="text-purple-500" />} label="System Status" value="Operational" />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                            {/* User Management */}
                             <div className="lg:col-span-2 space-y-6">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                                    <h3 className="text-lg font-bold flex items-center gap-2">
-                                        <Users size={20} className="text-blue-500" /> User Directory
-                                    </h3>
+                                    <h3 className="text-lg font-bold flex items-center gap-2"><Users size={20} className="text-blue-500" /> User Directory</h3>
                                     <div className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                                        <input
-                                            type="text" placeholder="Search users..."
-                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-600 bg-slate-900 text-sm focus:outline-none focus:border-blue-500 transition-all shadow-sm"
-                                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
+                                        <input type="text" placeholder="Search users..."
+                                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-600 bg-slate-900 text-sm focus:outline-none focus:border-blue-500 transition-all"
+                                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                                     </div>
                                 </div>
-                                <div className="bg-slate-900 rounded-3xl border border-slate-600 overflow-hidden shadow-sm overflow-x-auto">
-                                    <table className="w-full text-left min-w-[600px]">
-                                        <thead className="bg-[#020617] border-b border-slate-600">
+                                <div className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow-sm overflow-x-auto">
+                                    <table className="w-full text-left min-w-[500px]">
+                                        <thead className="bg-[#020617] border-b border-slate-700">
                                             <tr>
                                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">User</th>
                                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Status</th>
                                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100/5">
+                                        <tbody className="divide-y divide-slate-800">
                                             {loading ? <tr><td colSpan="3" className="px-6 py-10 text-center text-slate-400">Loading...</td></tr> :
-                                                filteredProfiles.map(profile => (
-                                                    <tr key={profile.id} className="hover:bg-[#020617]/50 transition-colors">
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 border border-slate-600 overflow-hidden shrink-0">
-                                                                    {profile.avatar_url ? <img src={profile.avatar_url} className="h-full w-full object-cover" /> : <Users size={18} />}
+                                                filteredProfiles.length === 0 ? <tr><td colSpan="3" className="px-6 py-10 text-center text-slate-500">No users found.</td></tr> :
+                                                    filteredProfiles.map(profile => (
+                                                        <tr key={profile.id} className="hover:bg-slate-800/40 transition-colors">
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 border border-slate-700 overflow-hidden shrink-0">
+                                                                        {profile.avatar_url ? <img src={profile.avatar_url} className="h-full w-full object-cover" /> : <Users size={18} />}
+                                                                    </div>
+                                                                    <div><div className="font-bold text-white truncate">{profile.full_name || 'Anonymous'}</div>
+                                                                        <div className="text-xs text-slate-400">@{profile.username || 'no-username'}</div></div>
                                                                 </div>
-                                                                <div className="min-w-0">
-                                                                    <div className="font-bold text-white truncate">{profile.full_name || 'Anonymous User'}</div>
-                                                                    <div className="text-xs text-slate-400 truncate">@{profile.username || 'no-username'}</div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", profile.is_admin ? "bg-blue-900/40 text-blue-400 border border-blue-500/20" : "bg-slate-900 text-slate-400 border border-slate-700")}>
-                                                                {profile.is_admin ? 'Admin' : 'Client'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-right text-slate-400">
-                                                            <button className="hover:text-white p-2"><MoreVertical size={18} /></button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                                                                    profile.is_admin ? "bg-blue-900/40 text-blue-400 border border-blue-500/20" : "bg-slate-800 text-slate-400 border border-slate-700")}>
+                                                                    {profile.is_admin ? 'Admin' : 'Client'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right text-slate-400">
+                                                                <button className="hover:text-white p-2"><MoreVertical size={18} /></button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-
-                            {/* Site Tracking */}
                             <div className="space-y-6">
-                                <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <Globe size={20} className="text-cyan-500" /> Tracking (Sites)
-                                </h3>
+                                <h3 className="text-lg font-bold flex items-center gap-2"><Globe size={20} className="text-cyan-500" /> Site Tracking</h3>
                                 <div className="space-y-4">
                                     {sites.length === 0 ? (
-                                        <div className="p-8 rounded-3xl border border-dashed border-slate-500 text-center text-slate-400">
-                                            <Globe size={32} className="mx-auto mb-4 text-slate-200" /> No sites tracked yet.
+                                        <div className="p-8 rounded-3xl border border-dashed border-slate-600 text-center text-slate-400">
+                                            <Globe size={32} className="mx-auto mb-4 text-slate-600" /> No sites tracked yet.
                                         </div>
                                     ) : sites.map(site => (
-                                        <div key={site.id} className="p-6 rounded-3xl border border-slate-600 bg-slate-900 shadow-sm hover:shadow-md transition-all">
+                                        <div key={site.id} className="p-6 rounded-3xl border border-slate-700 bg-slate-900 shadow-sm">
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className="h-10 w-10 rounded-xl bg-cyan-50 text-cyan-500 flex items-center justify-center"><Globe size={20} /></div>
-                                                <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", site.status === 'live' ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600")}>
+                                                <div className="h-10 w-10 rounded-xl bg-cyan-900/30 text-cyan-500 flex items-center justify-center"><Globe size={20} /></div>
+                                                <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                                                    site.status === 'live' ? "bg-green-900/40 text-green-400" : "bg-amber-900/40 text-amber-400")}>
                                                     {site.status}
                                                 </span>
                                             </div>
                                             <h4 className="font-bold text-white mb-1">{site.name}</h4>
-                                            <p className="text-xs text-slate-400 flex items-center gap-1 mb-4"><Users size={12} /> Owner: {site.profiles?.full_name || 'Unknown'}</p>
-                                            {site.url && <a href={site.url} target="_blank" className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">Visit Site <ExternalLink size={12} /></a>}
+                                            <p className="text-xs text-slate-400 mb-4">Owner: {site.profiles?.full_name || 'Unknown'}</p>
+                                            {site.url && <a href={site.url} target="_blank" className="text-xs font-bold text-blue-400 flex items-center gap-1 hover:underline">Visit Site <ExternalLink size={12} /></a>}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
                     </motion.div>
-                ) : (
+                )}
+
+                {/* ---- PORTFOLIO TAB ---- */}
+                {activeTab === 'portfolio' && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-                                <ImageIcon className="text-blue-500" /> Portfolio Content Manager
-                            </h2>
-                            <button
-                                onClick={openCreateModal}
-                                className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-md active:scale-95"
-                            >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3"><ImageIcon className="text-blue-500" /> Portfolio Manager</h2>
+                                <p className="text-slate-400 text-sm mt-1">Add your work items here — they appear live on the website.</p>
+                            </div>
+                            <button onClick={openCreatePortfolioModal}
+                                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-md active:scale-95 shrink-0">
                                 <Plus size={18} /> Add New Item
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {portfolioItems.length === 0 && !loading && (
-                                <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-600 rounded-[3rem]">
-                                    <ImageIcon size={48} className="mx-auto mb-4 text-slate-300" />
-                                    <h3 className="text-xl font-bold text-white mb-2">No portfolio items</h3>
-                                    <p className="text-slate-400 mb-6">Create your first portfolio item to display it on the main site.</p>
-                                    <button onClick={openCreateModal} className="text-blue-600 font-bold hover:underline">Create Item</button>
+                        {loading ? <div className="text-center py-20 text-slate-400">Loading...</div> :
+                            portfolioItems.length === 0 ? (
+                                <div className="py-20 text-center border-2 border-dashed border-slate-700 rounded-[3rem]">
+                                    <ImageIcon size={48} className="mx-auto mb-4 text-slate-600" />
+                                    <h3 className="text-xl font-bold mb-2">No portfolio items yet</h3>
+                                    <p className="text-slate-400 mb-6 text-sm">Create your first item to display it on the site.</p>
+                                    <button onClick={openCreatePortfolioModal} className="text-blue-400 font-bold hover:underline">+ Create Item</button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {portfolioItems.map(item => (
+                                        <div key={item.id} className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow group hover:border-blue-500/40 transition-all">
+                                            <div className="aspect-[4/3] relative bg-slate-800">
+                                                {item.cover_image
+                                                    ? <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover" />
+                                                    : <div className="w-full h-full flex items-center justify-center text-slate-600"><ImageIcon size={48} /></div>}
+                                                <div className="absolute top-3 left-3">
+                                                    <span className="bg-slate-900/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">{item.category}</span>
+                                                </div>
+                                            </div>
+                                            <div className="p-5">
+                                                <h3 className="font-bold text-white mb-1 truncate">{item.title}</h3>
+                                                <p className="text-xs text-slate-400 line-clamp-2 mb-4">{item.description}</p>
+                                                {item.gallery_images?.length > 0 && (
+                                                    <p className="text-[10px] text-slate-500 mb-4">{item.gallery_images.length} gallery image(s)</p>
+                                                )}
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => editPortfolioItem(item)}
+                                                        className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-700 transition-colors">
+                                                        <Edit2 size={14} /> Edit
+                                                    </button>
+                                                    <button onClick={() => deletePortfolioItem(item.id)}
+                                                        className="flex items-center justify-center p-2.5 bg-red-900/30 text-red-400 rounded-xl hover:bg-red-900/60 transition-colors">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-
-                            {portfolioItems.map(item => (
-                                <div key={item.id} className="bg-slate-900 rounded-3xl border border-slate-600 overflow-hidden shadow-sm group">
-                                    <div className="aspect-[4/3] relative bg-slate-900">
-                                        {item.cover_image ? (
-                                            <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={48} /></div>
-                                        )}
-                                        <div className="absolute top-4 left-4">
-                                            <span className="bg-slate-900/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
-                                                {item.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-6">
-                                        <h3 className="font-bold text-lg text-white mb-2 truncate">{item.title}</h3>
-                                        <p className="text-sm text-slate-400 line-clamp-2 mb-6">{item.description}</p>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => editItem(item)}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-slate-300 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors"
-                                            >
-                                                <Edit2 size={16} /> Edit
-                                            </button>
-                                            <button
-                                                onClick={() => deleteItem(item.id)}
-                                                className="flex items-center justify-center p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     </motion.div>
                 )}
+
+                {/* ---- SERVICES TAB ---- */}
+                {activeTab === 'services' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3"><Settings className="text-blue-500" /> Service Manager</h2>
+                                <p className="text-slate-400 text-sm mt-1">Manage the services displayed on your homepage.</p>
+                            </div>
+                            <button onClick={openCreateServiceModal}
+                                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-md active:scale-95 shrink-0">
+                                <Plus size={18} /> Add Service
+                            </button>
+                        </div>
+
+                        {loading ? <div className="text-center py-20 text-slate-400">Loading...</div> :
+                            services.length === 0 ? (
+                                <div className="py-20 text-center border-2 border-dashed border-slate-700 rounded-[3rem]">
+                                    <Settings size={48} className="mx-auto mb-4 text-slate-600" />
+                                    <h3 className="text-xl font-bold mb-2">No services yet</h3>
+                                    <p className="text-slate-400 mb-6 text-sm">Add your first service to display it on the homepage.</p>
+                                    <button onClick={openCreateServiceModal} className="text-blue-400 font-bold hover:underline">+ Add Service</button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {services.map(svc => (
+                                        <div key={svc.id} className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow hover:border-blue-500/40 transition-all">
+                                            {svc.cover_image && (
+                                                <div className="aspect-[4/3] relative bg-slate-800">
+                                                    <img src={svc.cover_image} alt={svc.title} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="p-5">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <div className="h-8 w-8 rounded-xl bg-blue-600/10 text-blue-400 flex items-center justify-center text-xs font-black">{svc.icon?.substring(0, 2)}</div>
+                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Order: {svc.display_order}</span>
+                                                </div>
+                                                <h3 className="font-bold text-white mb-1">{svc.title}</h3>
+                                                <p className="text-xs text-slate-400 line-clamp-2 mb-4">{svc.description}</p>
+                                                {svc.points?.length > 0 && <p className="text-[10px] text-slate-500 mb-4">{svc.points.length} feature point(s)</p>}
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => editService(svc)}
+                                                        className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-700 transition-colors">
+                                                        <Edit2 size={14} /> Edit
+                                                    </button>
+                                                    <button onClick={() => deleteService(svc.id)}
+                                                        className="flex items-center justify-center p-2.5 bg-red-900/30 text-red-400 rounded-xl hover:bg-red-900/60 transition-colors">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                    </motion.div>
+                )}
+
             </main>
 
+            {/* ---- PORTFOLIO MODAL ---- */}
             <AnimatePresence>
-                {showModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-slate-600"
-                        >
-                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-700 bg-[#020617]/50">
-                                <h3 className="text-2xl font-bold text-white">
-                                    {editingId ? 'Edit Portfolio Item' : 'New Portfolio Item'}
-                                </h3>
-                                <button onClick={() => setShowModal(false)} className="p-2 bg-slate-800 rounded-full hover:bg-slate-300 transition-colors">
-                                    <X size={20} />
-                                </button>
+                {showPortfolioModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-slate-700">
+                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-800 bg-[#020617]/50">
+                                <h3 className="text-2xl font-bold">{editingPortfolioId ? 'Edit Portfolio Item' : 'New Portfolio Item'}</h3>
+                                <button onClick={() => setShowPortfolioModal(false)} className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors"><X size={20} /></button>
                             </div>
-
-                            <form onSubmit={handlePortfolioSubmit} className="p-6 md:p-8 space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <form onSubmit={handlePortfolioSubmit} className="p-6 md:p-8 space-y-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Title</label>
-                                        <input required className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none"
-                                            value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="e.g. Miss Qhawekazi Voting Platform" />
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Title *</label>
+                                        <input required className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={portfolioForm.title} onChange={e => setPortfolioForm({ ...portfolioForm, title: e.target.value })} placeholder="e.g. Miss Qhawekazi Voting Platform" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Category</label>
-                                        <select required className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none"
-                                            value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Category *</label>
+                                        <select required className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={portfolioForm.category} onChange={e => setPortfolioForm({ ...portfolioForm, category: e.target.value })}>
                                             <option>Voting Platform</option>
                                             <option>Internal Business System</option>
                                             <option>Poster Design</option>
                                             <option>Logo Design</option>
+                                            <option>Web Design</option>
                                         </select>
                                     </div>
                                 </div>
-
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Description</label>
-                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none"
-                                        value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Brief description of the work..." />
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Description *</label>
+                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none text-white"
+                                        value={portfolioForm.description} onChange={e => setPortfolioForm({ ...portfolioForm, description: e.target.value })} placeholder="Brief description of the work..." />
                                 </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Badge text (Optional)</label>
-                                        <input className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none"
-                                            value={form.badge} onChange={e => setForm({ ...form, badge: e.target.value })} placeholder="e.g. Featured SaaS" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Cover Image URL</label>
-                                        <input className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none"
-                                            value={form.cover_image} onChange={e => setForm({ ...form, cover_image: e.target.value })} placeholder="https://..." />
-                                    </div>
-                                </div>
-
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Gallery Images (URLs, one per line)</label>
-                                    <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-slate-600 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none placeholder:text-slate-400 font-mono text-sm leading-relaxed whitespace-pre"
-                                        value={form.gallery_images} onChange={e => setForm({ ...form, gallery_images: e.target.value })}
-                                        placeholder="https://image1.com/img.jpg&#10;https://image2.com/img.jpg" />
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Badge Text (Optional)</label>
+                                    <input className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                        value={portfolioForm.badge} onChange={e => setPortfolioForm({ ...portfolioForm, badge: e.target.value })} placeholder="e.g. Featured SaaS" />
                                 </div>
-
-                                <div className="pt-4 border-t border-slate-700 flex justify-end gap-4">
-                                    <button type="button" onClick={() => setShowModal(false)} className="px-6 py-3 font-bold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                                <ImageUploadField label="Cover Image (Upload from PC)" value={portfolioForm.cover_image} onChange={url => setPortfolioForm({ ...portfolioForm, cover_image: url })} />
+                                <ImageUploadField label="Gallery Images (Upload multiple from PC)" value={portfolioForm.gallery_images} onChange={val => setPortfolioForm({ ...portfolioForm, gallery_images: val })} multiple />
+                                <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row justify-end gap-3">
+                                    <button type="button" onClick={() => setShowPortfolioModal(false)} className="px-6 py-3 font-bold text-slate-400 hover:text-white transition-colors">Cancel</button>
                                     <button type="submit" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-500 transition-colors active:scale-95">Save Item</button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* ---- SERVICE MODAL ---- */}
+            <AnimatePresence>
+                {showServiceModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-slate-700">
+                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-800 bg-[#020617]/50">
+                                <h3 className="text-2xl font-bold">{editingServiceId ? 'Edit Service' : 'New Service'}</h3>
+                                <button onClick={() => setShowServiceModal(false)} className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors"><X size={20} /></button>
+                            </div>
+                            <form onSubmit={handleServiceSubmit} className="p-6 md:p-8 space-y-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Service Title *</label>
+                                        <input required className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} placeholder="e.g. Custom Software Systems" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Icon Name</label>
+                                        <select className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })}>
+                                            <option value="Code2">Code2 (Software)</option>
+                                            <option value="ShieldCheck">ShieldCheck (Security/Voting)</option>
+                                            <option value="Image">Image (Design)</option>
+                                            <option value="Palette">Palette (Logo/Brand)</option>
+                                            <option value="Globe">Globe (Web)</option>
+                                            <option value="Cpu">Cpu (AI/Tech)</option>
+                                            <option value="Zap">Zap (Fast/Deploy)</option>
+                                            <option value="Bot">Bot (AI)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Description *</label>
+                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none text-white"
+                                        value={serviceForm.description} onChange={e => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="Brief description of the service..." />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Feature Points (one per line)</label>
+                                    <textarea rows={5} className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none text-white font-mono text-sm"
+                                        value={serviceForm.points} onChange={e => setServiceForm({ ...serviceForm, points: e.target.value })}
+                                        placeholder={"Staff management systems\nOrder tracking systems\nAdmin dashboards"} />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">WhatsApp Message</label>
+                                        <input className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={serviceForm.whatsapp_msg} onChange={e => setServiceForm({ ...serviceForm, whatsapp_msg: e.target.value })} placeholder="Hello, I want this service." />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Display Order</label>
+                                        <input type="number" className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
+                                            value={serviceForm.display_order} onChange={e => setServiceForm({ ...serviceForm, display_order: e.target.value })} />
+                                    </div>
+                                </div>
+                                <ImageUploadField label="Service Cover Image (Optional)" value={serviceForm.cover_image} onChange={url => setServiceForm({ ...serviceForm, cover_image: url })} />
+                                <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row justify-end gap-3">
+                                    <button type="button" onClick={() => setShowServiceModal(false)} className="px-6 py-3 font-bold text-slate-400 hover:text-white transition-colors">Cancel</button>
+                                    <button type="submit" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-500 transition-colors active:scale-95">Save Service</button>
                                 </div>
                             </form>
                         </motion.div>
@@ -424,18 +659,12 @@ export default function Admin() {
 
 function StatCard({ icon, label, value }) {
     return (
-        <div className="p-8 rounded-[2.5rem] border border-slate-600 bg-slate-900 shadow-sm hover:shadow-md transition-shadow">
+        <div className="p-8 rounded-[2.5rem] border border-slate-700 bg-slate-900 shadow hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4 mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-[#020617] flex items-center justify-center">
-                    {icon}
-                </div>
+                <div className="h-12 w-12 rounded-2xl bg-[#020617] flex items-center justify-center">{icon}</div>
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">{label}</div>
             </div>
             <div className="text-4xl font-black text-white tracking-tight">{value}</div>
         </div>
     );
-}
-
-function cn(...classes) {
-    return classes.filter(Boolean).join(' ');
 }

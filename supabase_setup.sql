@@ -1,39 +1,75 @@
--- 1. Create a table for Public Profiles
-create table public.profiles (
-  id uuid references auth.users on delete cascade not null primary key,
-  updated_at timestamp with time zone,
-  username text unique,
-  full_name text,
-  avatar_url text,
-  website text,
+-- Run this SQL in your Supabase SQL Editor to enable dynamic services and portfolio management.
 
-  constraint username_length check (char_length(username) >= 3)
+-- =============================================
+-- 1. PORTFOLIO_ITEMS TABLE (ensure it exists)
+-- =============================================
+CREATE TABLE IF NOT EXISTS portfolio_items (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at timestamptz DEFAULT now() NOT NULL,
+    title text NOT NULL,
+    category text NOT NULL DEFAULT 'Voting Platform',
+    description text,
+    badge text,
+    cover_image text,
+    gallery_images text[] DEFAULT '{}'::text[]
 );
 
--- 2. Set up Row Level Security (RLS)
--- Profiles are readable by everyone, but only editable by the owner.
-alter table public.profiles enable row level security;
+-- Enable public read access for portfolio items
+ALTER TABLE portfolio_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Public read portfolio_items"
+    ON portfolio_items FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "Admin insert portfolio_items"
+    ON portfolio_items FOR INSERT WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "Admin update portfolio_items"
+    ON portfolio_items FOR UPDATE USING (true);
+CREATE POLICY IF NOT EXISTS "Admin delete portfolio_items"
+    ON portfolio_items FOR DELETE USING (true);
 
-create policy "Public profiles are viewable by everyone." on public.profiles
-  for select using (true);
+-- =============================================
+-- 2. SERVICES TABLE (new - for dynamic services)
+-- =============================================
+CREATE TABLE IF NOT EXISTS services (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at timestamptz DEFAULT now() NOT NULL,
+    title text NOT NULL,
+    description text,
+    icon text DEFAULT 'Code2',
+    badge text,
+    points text[] DEFAULT '{}'::text[],
+    whatsapp_msg text,
+    cover_image text,
+    display_order int DEFAULT 0
+);
 
-create policy "Users can insert their own profile." on public.profiles
-  for insert with check (auth.uid() = id);
+-- Enable public read access for services
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Public read services"
+    ON services FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "Admin insert services"
+    ON services FOR INSERT WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "Admin update services"
+    ON services FOR UPDATE USING (true);
+CREATE POLICY IF NOT EXISTS "Admin delete services"
+    ON services FOR DELETE USING (true);
 
-create policy "Users can update own profile." on public.profiles
-  for update using (auth.uid() = id);
+-- =============================================
+-- 3. STORAGE BUCKET (for image uploads)
+-- =============================================
+-- Run this to create the portfolio storage bucket:
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('portfolio', 'portfolio', true)
+ON CONFLICT (id) DO NOTHING;
 
--- 3. Trigger to sync auth.users with public.profiles
--- This function inserts a row into public.profiles every time a user signs up.
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, full_name, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
-  return new;
-end;
-$$ language plpgsql security modeller;
+-- Allow anyone to read files from portfolio bucket
+CREATE POLICY IF NOT EXISTS "Public access portfolio bucket"
+    ON storage.objects FOR SELECT USING (bucket_id = 'portfolio');
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- Allow authenticated and anon users to upload to portfolio bucket
+CREATE POLICY IF NOT EXISTS "Upload to portfolio bucket"
+    ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'portfolio');
+
+-- Allow update and delete on portfolio bucket
+CREATE POLICY IF NOT EXISTS "Update portfolio bucket"
+    ON storage.objects FOR UPDATE USING (bucket_id = 'portfolio');
+CREATE POLICY IF NOT EXISTS "Delete portfolio bucket"
+    ON storage.objects FOR DELETE USING (bucket_id = 'portfolio');

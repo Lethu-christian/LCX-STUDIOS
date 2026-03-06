@@ -647,7 +647,35 @@ function About() {
     );
 }
 
+// --- ICON MAPPING for dynamic services ---
+const ICON_MAP = {
+    Code2, ShieldCheck, Globe, Palette, Cpu, Zap, Bot,
+    Image: ImageIcon,
+};
+
 function Services() {
+    const [cards, setCards] = useState(serviceCards); // fallback to hardcoded
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            const { data, error } = await supabase
+                .from('services')
+                .select('*')
+                .order('display_order', { ascending: true });
+            if (!error && data && data.length > 0) {
+                setCards(data.map(s => ({
+                    icon: ICON_MAP[s.icon] || Code2,
+                    title: s.title,
+                    desc: s.description,
+                    points: s.points || [],
+                    whatsapp: s.whatsapp_msg || `Hello, I want ${s.title}.`,
+                    cover_image: s.cover_image || null,
+                })));
+            }
+        };
+        fetchServices();
+    }, []);
+
     return (
         <section id="services" className="relative bg-slate-50 py-32 overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -659,48 +687,59 @@ function Services() {
                 />
 
                 <div className="mt-20 grid gap-10 lg:grid-cols-2">
-                    {serviceCards.map((service, i) => (
-                        <motion.div
-                            key={service.title}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
-                            className="group relative rounded-[3rem] p-1 sm:p-1.5 transition-all hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)]"
-                        >
-                            <div className="relative overflow-hidden rounded-[2.8rem] bg-white/40 border border-slate-200/50 p-8 sm:p-12 h-full backdrop-blur-3xl shadow-xl transition-all group-hover:bg-white/60 group-hover:border-slate-300">
-                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-8">
-                                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20">
-                                        <service.icon className="h-8 w-8" />
-                                    </div>
-                                    <a
-                                        href={createWhatsAppLink(service.whatsapp)}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
-                                    >
-                                        Inquire <ChevronRight className="ml-2 h-4 w-4" />
-                                    </a>
-                                </div>
-
-                                <h3 className="mt-10 text-3xl font-black text-slate-950 tracking-tighter">{service.title}</h3>
-                                <p className="mt-6 text-base font-medium text-slate-500 leading-relaxed">
-                                    {service.desc}
-                                </p>
-
-                                <div className="mt-12 grid gap-4 sm:grid-cols-2">
-                                    {service.points.map((point) => (
-                                        <div key={point} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 text-xs font-bold text-slate-700">
-                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
-                                                <BadgeCheck className="h-4 w-4" />
-                                            </div>
-                                            {point}
+                    {cards.map((service, i) => {
+                        const IconComp = service.icon;
+                        return (
+                            <motion.div
+                                key={service.title}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
+                                className="group relative rounded-[3rem] p-1 sm:p-1.5 transition-all hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)]"
+                            >
+                                <div className="relative overflow-hidden rounded-[2.8rem] bg-white/40 border border-slate-200/50 p-8 sm:p-12 h-full backdrop-blur-3xl shadow-xl transition-all group-hover:bg-white/60 group-hover:border-slate-300">
+                                    {/* Service cover image if available */}
+                                    {service.cover_image && (
+                                        <div className="mb-8 -mx-8 sm:-mx-12 -mt-8 sm:-mt-12 h-48 overflow-hidden rounded-t-[2.4rem]">
+                                            <img src={service.cover_image} alt={service.title} className="w-full h-full object-cover" />
                                         </div>
-                                    ))}
+                                    )}
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-8">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20">
+                                            {IconComp && <IconComp className="h-8 w-8" />}
+                                        </div>
+                                        <a
+                                            href={createWhatsAppLink(service.whatsapp)}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
+                                        >
+                                            Inquire <ChevronRight className="ml-2 h-4 w-4" />
+                                        </a>
+                                    </div>
+
+                                    <h3 className="mt-10 text-3xl font-black text-slate-950 tracking-tighter">{service.title}</h3>
+                                    <p className="mt-6 text-base font-medium text-slate-500 leading-relaxed">
+                                        {service.desc}
+                                    </p>
+
+                                    {service.points && service.points.length > 0 && (
+                                        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                                            {service.points.map((point) => (
+                                                <div key={point} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-4 text-xs font-bold text-slate-700">
+                                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
+                                                        <BadgeCheck className="h-4 w-4" />
+                                                    </div>
+                                                    {point}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>
