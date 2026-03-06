@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Globe, Shield, Search, MoreVertical, ArrowLeft,
-    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X
+    LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X, Crown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

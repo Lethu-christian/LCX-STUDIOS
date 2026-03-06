@@ -1493,3 +1493,7 @@ export default function App() {
         </div>
     );
 }
+
+function cn(...classes) {
+    return classes.filter(Boolean).join(' ');
+}
