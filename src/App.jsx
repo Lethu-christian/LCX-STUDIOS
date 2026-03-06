@@ -269,7 +269,7 @@ function createWhatsAppLink(message) {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-function handlePayment(amountInCents, description) {
+function handlePayment(amountInCents, description, onSuccess) {
     if (typeof window.YocoSDK === 'undefined') {
         alert("Payment system is still loading. Please try again in a moment.");
         return;
@@ -302,6 +302,7 @@ function handlePayment(amountInCents, description) {
                         alert("Payment received but verification failed. Please contact support.");
                     } else if (data.success) {
                         alert("Success! Your payment of " + (data.amount / 100) + " " + data.currency + " has been verified.");
+                        if (onSuccess) onSuccess();
                     } else {
                         alert("Payment status: " + data.status);
                     }
@@ -697,6 +698,17 @@ function Services() {
 }
 
 function PricingCards() {
+    const [paidItems, setPaidItems] = useState({});
+
+    const handlePurchase = (pkg) => {
+        const amountString = pkg.price.replace(/[^0-9]/g, '');
+        const amountInCents = parseInt(amountString, 10) * 100;
+
+        handlePayment(amountInCents, `Payment for ${pkg.name}`, () => {
+            setPaidItems(prev => ({ ...prev, [pkg.name]: true }));
+        });
+    };
+
     return (
         <section id="pricing" className="bg-slate-950 py-32 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.1),transparent_50%)]" />
@@ -722,14 +734,26 @@ function PricingCards() {
                                 <h4 className="text-lg font-bold text-white">{pkg.name}</h4>
                                 <div className="mt-2 text-3xl font-black text-blue-400">{pkg.price}</div>
                                 <p className="mt-4 text-xs text-slate-400 leading-relaxed flex-1">{pkg.desc}</p>
-                                <a
-                                    href={createWhatsAppLink(pkg.whatsapp)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-3 text-xs font-bold text-white transition-all hover:bg-white/20"
-                                >
-                                    Rent System
-                                </a>
+
+                                {paidItems[pkg.name] ? (
+                                    <a
+                                        href={createWhatsAppLink(`Here is my proof of payment for the ${pkg.name}. My brand details and idea of what I need are: `)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600/20 py-3 text-[10px] sm:text-xs font-bold text-green-400 transition-all hover:bg-green-600/30 text-center px-4 leading-tight"
+                                    >
+                                        <MessageCircle className="h-4 w-4 shrink-0" />
+                                        Send Proof of Payment to LCX STUDIOS with Brand Details
+                                    </a>
+                                ) : (
+                                    <button
+                                        onClick={() => handlePurchase(pkg)}
+                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-xs font-bold text-white transition-all hover:bg-blue-500 shadow-lg shadow-blue-500/20"
+                                    >
+                                        <WalletCards className="h-4 w-4" />
+                                        Buy / Rent Now
+                                    </button>
+                                )}
                             </motion.div>
                         ))}
                     </div>
@@ -775,18 +799,31 @@ function PricingCards() {
                                 ))}
                             </ul>
 
-                            <a
-                                href={createWhatsAppLink(pkg.whatsapp)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={cn(
-                                    "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold uppercase tracking-widest transition-all",
-                                    pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500" : "bg-white/10 text-white hover:bg-white/20"
-                                )}
-                            >
-                                <MessageCircle className="h-5 w-5" />
-                                Buy This Package
-                            </a>
+                            {paidItems[pkg.name] ? (
+                                <a
+                                    href={createWhatsAppLink(`Here is my proof of payment for the ${pkg.name}. My brand details and idea of what I need are: `)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 rounded-2xl py-4 px-4 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all text-center leading-tight",
+                                        "bg-green-600/20 text-green-400 hover:bg-green-600/30"
+                                    )}
+                                >
+                                    <MessageCircle className="h-5 w-5 shrink-0" />
+                                    Send Proof of Payment to LCX STUDIOS with Brand Details
+                                </a>
+                            ) : (
+                                <button
+                                    onClick={() => handlePurchase(pkg)}
+                                    className={cn(
+                                        "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold uppercase tracking-widest transition-all",
+                                        pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500" : "bg-white/10 text-white hover:bg-white/20"
+                                    )}
+                                >
+                                    <WalletCards className="h-5 w-5" />
+                                    Buy This Package
+                                </button>
+                            )}
                         </motion.div>
                     ))}
 
