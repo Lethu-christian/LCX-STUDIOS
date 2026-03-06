@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LCX_LOGO_B64 } from "./assets/logo-b64";
@@ -1194,12 +1194,52 @@ function Contact() {
 
 function SmartChatWidget() {
     const [open, setOpen] = useState(false);
-    const [form, setForm] = useState({ name: "", contact: "", service: "System Request", info: "" });
+    const [messages, setMessages] = useState([
+        { role: "assistant", content: "Hi! I am LCX AI. I can answer questions about our services, pricing, and project process. How can I help you today?" }
+    ]);
+    const [input, setInput] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
 
-    const href = useMemo(() => {
-        const text = `Live Chat Support Request:%0A- Name: ${form.name}%0A- Contact: ${form.contact}%0A- Service: ${form.service}%0A- Request: ${form.info}`;
-        return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
-    }, [form]);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        if (open) {
+            scrollToBottom();
+        }
+    }, [messages, open]);
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        const userMessage = { role: "user", content: input.trim() };
+        setMessages((prev) => [...prev, userMessage]);
+        setInput("");
+        setIsLoading(true);
+
+        try {
+            const { data, error } = await supabase.functions.invoke('chat-ai', {
+                body: { messages: [...messages, userMessage] }
+            });
+
+            if (error) throw error;
+
+            if (data.error) {
+                // Return gracefully if missing API keys
+                setMessages((prev) => [...prev, { role: "assistant", content: data.error }]);
+            } else if (data.reply) {
+                setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+            }
+        } catch (err) {
+            console.error("Chat error:", err);
+            setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I am having trouble connecting right now. Please try again later or contact support directly." }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <>
@@ -1218,43 +1258,68 @@ function SmartChatWidget() {
                         initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="fixed bottom-28 right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50/90 shadow-2xl backdrop-blur-2xl"
+                        className="fixed bottom-28 right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[600px] max-h-[70vh]"
                     >
-                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-slate-950">
-                            <div className="text-sm font-black uppercase tracking-widest text-slate-950/60">AI Assistant</div>
-                            <h3 className="mt-1 text-2xl font-black tracking-tight">How can we help?</h3>
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-slate-950 shrink-0">
+                            <div className="text-sm font-black uppercase tracking-widest text-slate-950/60 flex items-center gap-2">
+                                <Sparkles className="h-4 w-4" /> LCX AI
+                            </div>
+                            <h3 className="mt-1 text-2xl font-black tracking-tight">How can I help?</h3>
                             <p className="mt-2 text-xs font-bold text-slate-950/70 leading-relaxed">
-                                Connect directly with the LCX STUDIOS team and get your project started.
+                                Ask me about pricing, services, or how to get started.
                             </p>
                         </div>
 
-                        <div className="p-8 space-y-4">
-                            <input
-                                className="w-full rounded-2xl border border-slate-100 bg-slate-100 px-6 py-4 text-sm text-slate-950"
-                                placeholder="Your Name"
-                                value={form.name}
-                                onChange={e => setForm({ ...form, name: e.target.value })}
-                            />
-                            <input
-                                className="w-full rounded-2xl border border-slate-100 bg-slate-100 px-6 py-4 text-sm text-slate-950"
-                                placeholder="Email or WhatsApp Number"
-                                value={form.contact}
-                                onChange={e => setForm({ ...form, contact: e.target.value })}
-                            />
-                            <textarea
-                                className="w-full h-32 rounded-2xl border border-slate-100 bg-slate-100 px-6 py-4 text-sm text-slate-950 resize-none"
-                                placeholder="Briefly describe your request..."
-                                value={form.info}
-                                onChange={e => setForm({ ...form, info: e.target.value })}
-                            />
-                            <a
-                                href={href}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 py-5 text-sm font-black uppercase tracking-widest text-slate-950 shadow-xl"
-                            >
-                                <MessageCircle className="h-5 w-5" /> Start Chat
-                            </a>
+                        {/* Chat Messages Area */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                                    <div className={cn(
+                                        "max-w-[85%] rounded-[1.5rem] px-5 py-3.5 text-sm leading-relaxed",
+                                        msg.role === "user"
+                                            ? "bg-cyan-500 text-slate-950 font-medium rounded-tr-sm"
+                                            : "bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-sm"
+                                    )}>
+                                        {msg.content}
+                                    </div>
+                                </div>
+                            ))}
+
+                            {isLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-white border border-slate-200 text-slate-400 rounded-[1.5rem] rounded-tl-sm px-5 py-4 shadow-sm flex gap-1.5 items-center">
+                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-2 h-2 rounded-full bg-slate-300" />
+                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-2 h-2 rounded-full bg-slate-300" />
+                                        <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 rounded-full bg-slate-300" />
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="p-4 bg-white border-t border-slate-100 shrink-0">
+                            <form onSubmit={handleSendMessage} className="relative flex items-center">
+                                <input
+                                    type="text"
+                                    className="w-full rounded-full border border-slate-200 bg-slate-50 pl-6 pr-14 py-4 text-sm text-slate-950 outline-none focus:border-cyan-400 focus:bg-white transition-all placeholder:text-slate-400"
+                                    placeholder="Type your message..."
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    disabled={isLoading}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!input.trim() || isLoading}
+                                    className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500 text-slate-950 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                                >
+                                    <Send className="h-4 w-4" />
+                                </button>
+                            </form>
+                            <div className="mt-3 text-center text-[10px] text-slate-400 font-medium uppercase tracking-widest">
+                                AI responses may not be 100% accurate.
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -1265,7 +1330,7 @@ function SmartChatWidget() {
 
 function Footer() {
     return (
-        <footer className="bg-slate-950 py-20 border-t border-white/5">
+        <footer className="bg-slate-950 py-20 border-t border-white/5 relative">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-12">
                     <div className="text-center md:text-left">
@@ -1289,8 +1354,11 @@ function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-20 pt-10 border-t border-white/5 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
-                    © {new Date().getFullYear()} LCX STUDIOS. All rights reserved.
+                <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
+                    <div>© {new Date().getFullYear()} LCX STUDIOS. All rights reserved.</div>
+                    <a href="/admin" className="hover:text-white transition-colors flex items-center gap-1">
+                        <Crown className="w-3 h-3" /> Admin Access
+                    </a>
                 </div>
             </div>
         </footer>
