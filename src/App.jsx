@@ -356,7 +356,7 @@ function TopNav({ session, onPortalClick }) {
                         className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 md:inline-flex"
                     >
                         {session ? <LayoutDashboard className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                        {session ? "Portal" : "Login"}
+                        {session ? "Portal" : "Login / Register"}
                     </button>
 
                     <a
@@ -392,6 +392,13 @@ function TopNav({ session, onPortalClick }) {
                                     {item.label}
                                 </a>
                             ))}
+                            <button
+                                onClick={() => { setOpen(false); onPortalClick(); }}
+                                className="flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/5 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white/10"
+                            >
+                                {session ? <LayoutDashboard className="h-5 w-5" /> : <User className="h-5 w-5" />}
+                                {session ? "Access Portal" : "Login / Register"}
+                            </button>
                             <a
                                 href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
                                 target="_blank"
