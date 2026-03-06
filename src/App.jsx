@@ -25,7 +25,6 @@ import {
     Palette,
     Phone,
     Send,
-    ShieldCheck,
     Sparkles,
     Star,
     User,
@@ -1492,8 +1491,4 @@ export default function App() {
             <SmartChatWidget />
         </div>
     );
-}
-
-function cn(...classes) {
-    return classes.filter(Boolean).join(' ');
 }
