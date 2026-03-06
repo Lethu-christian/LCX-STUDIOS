@@ -2,6 +2,60 @@
 -- Go to: Supabase Dashboard → SQL Editor → New Query → Paste → Run
 
 -- =============================================
+-- 0. PROFILES TABLE + AUTO-TRIGGER
+-- =============================================
+CREATE TABLE IF NOT EXISTS profiles (
+    id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    updated_at timestamptz DEFAULT now(),
+    full_name text,
+    username text,
+    avatar_url text,
+    is_admin boolean DEFAULT false
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read profiles"  ON profiles;
+DROP POLICY IF EXISTS "Users update own profile" ON profiles;
+
+CREATE POLICY "Public read profiles"   ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Trigger: auto-create a profile row whenever someone signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, username, avatar_url, updated_at)
+  VALUES (
+    new.id,
+    COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    LOWER(REPLACE(split_part(new.email, '@', 1), '.', '_')),
+    COALESCE(new.raw_user_meta_data->>'avatar_url', new.raw_user_meta_data->>'picture'),
+    now()
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN new;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Backfill: create profiles for users who already signed up before this trigger existed
+INSERT INTO public.profiles (id, full_name, username, avatar_url, updated_at)
+SELECT
+  id,
+  COALESCE(raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', split_part(email, '@', 1)),
+  LOWER(REPLACE(split_part(email, '@', 1), '.', '_')),
+  COALESCE(raw_user_meta_data->>'avatar_url', raw_user_meta_data->>'picture'),
+  now()
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
+
+
+-- =============================================
 -- 1. PORTFOLIO_ITEMS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS portfolio_items (
