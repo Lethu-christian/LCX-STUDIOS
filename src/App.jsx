@@ -459,7 +459,7 @@ function Hero() {
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
             </div>
 
-            <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-6 sm:px-12 py-32 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+            <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 sm:px-12 py-16 sm:py-32 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
                 <motion.div style={{ opacity }} className="flex flex-col justify-center">
                     <motion.div
                         variants={fadeUpVariant}
@@ -532,7 +532,7 @@ function Hero() {
                     initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
                     transition={{ duration: 1.5, ease: luxuryEase }}
-                    className="relative flex items-center justify-center lg:block"
+                    className="relative flex items-center justify-center lg:block order-first lg:order-none mb-12 lg:mb-0"
                 >
                     <div className="absolute -inset-20 bg-blue-500/5 blur-[120px] rounded-full" />
                     <div className="relative group">
@@ -542,7 +542,7 @@ function Hero() {
                                 rotateY: [0, 8, 0],
                             }}
                             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                            className="relative z-10 flex h-[280px] w-[280px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] items-center justify-center rounded-[4rem] border border-slate-200 bg-white/40 backdrop-blur-3xl p-12 shadow-[0_40px_100px_rgba(0,0,0,0.08)] transition-all group-hover:border-slate-300 group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.12)]"
+                            className="relative z-10 flex h-[200px] w-[200px] sm:h-[400px] sm:w-[400px] lg:h-[520px] lg:w-[520px] items-center justify-center rounded-[3rem] sm:rounded-[4rem] border border-slate-200/50 bg-white/40 backdrop-blur-3xl p-8 sm:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.08)] transition-all group-hover:border-slate-300 group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.12)]"
                         >
                             <img
                                 src="/logo.png"
