@@ -286,8 +286,11 @@ function createWhatsAppLink(message) {
 // ---------- YOCO PAY BUTTON COMPONENT (new redirect-based Checkout API) ----------
 function YocoPayButton({ amountInCents, description, onSuccess, label, onLoginRequired }) {
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState('idle'); // idle | initializing | verifying
-    const [isLoggedIn, setIsLoggedIn] = useState(null); // null = checking
+    const [status, setStatus] = useState('idle');
+    const [isLoggedIn, setIsLoggedIn] = useState(null);
+    const [successData, setSuccessData] = useState(null); // set after payment verified
+    const amountRand = `R${(amountInCents / 100).toFixed(0)}`;
+    const WHATSAPP_NUMBER = '27678846390';
 
     // Check session + auto-verify on return from Yoco
     useEffect(() => {
@@ -346,22 +349,20 @@ function YocoPayButton({ amountInCents, description, onSuccess, label, onLoginRe
     const verifyPayment = async (checkoutId, desc, userId) => {
         setStatus('verifying');
         setLoading(true);
-
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
-
         try {
             const { data, error } = await supabase.functions.invoke('verify-yoco', {
                 body: { mode: 'verify', checkoutId, description: desc, userId }
             });
-
             localStorage.removeItem('pendingYocoPurchase');
             setLoading(false);
             setStatus('idle');
-
             if (error || !data?.success) {
                 alert('Payment verification failed: ' + (data?.error || error?.message || 'Unknown error'));
             } else {
+                // Set success state — renders the WhatsApp CTA card (avoids popup block)
+                setSuccessData({ desc, amount: amountRand });
                 if (onSuccess) onSuccess();
             }
         } catch (err) {
@@ -371,6 +372,33 @@ function YocoPayButton({ amountInCents, description, onSuccess, label, onLoginRe
             setStatus('idle');
         }
     };
+
+    // --- PAYMENT SUCCESS: Show WhatsApp CTA (no popup needed) ---
+    if (successData) {
+        const waMsg = `Hello LCX STUDIOS! 🎉 I've just made a payment of ${successData.amount} for: ${successData.desc}. Please respond to confirm my order and next steps. Thank you!`;
+        const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
+        return (
+            <div className="w-full rounded-3xl bg-green-950/40 border border-green-500/30 p-6 text-center space-y-4">
+                <div className="flex items-center justify-center gap-2 text-green-400">
+                    <CheckCircle2 className="h-7 w-7" />
+                    <span className="text-lg font-black">Payment Successful!</span>
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                    You paid <strong className="text-white">{successData.amount}</strong> for <strong className="text-white">{successData.desc}</strong>.
+                </p>
+                <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 w-full rounded-full bg-green-600 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-green-500 transition-all active:scale-95 shadow-lg"
+                >
+                    <MessageCircle className="h-5 w-5" />
+                    Chat on WhatsApp — Confirm Order
+                </a>
+                <p className="text-[10px] text-slate-500">Tap the button above to open WhatsApp and confirm your order details.</p>
+            </div>
+        );
+    }
 
     // --- NOT LOGGED IN: Show login gate ---
     if (isLoggedIn === false) {

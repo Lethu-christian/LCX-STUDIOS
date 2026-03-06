@@ -111,7 +111,10 @@ CREATE POLICY "Users see own purchases"
 CREATE POLICY "Service role insert purchases"
     ON purchases FOR INSERT WITH CHECK (true);
 
--- Admins can read everything (using service role or is_admin profile check)
+-- =============================================
+-- ALSO RUN THIS if you are an admin and can't see purchases in the dashboard:
+-- =============================================
+DROP POLICY IF EXISTS "Admin read all purchases" ON purchases;
 CREATE POLICY "Admin read all purchases"
     ON purchases FOR SELECT
     USING (

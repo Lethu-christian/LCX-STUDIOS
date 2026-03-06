@@ -75,7 +75,7 @@ const Account = ({ session, onSignOut, onBack }) => {
     };
 
     const handleWhatsApp = (purchase) => {
-        const msg = `Hello LCX STUDIOS, I have a query about my order: ${purchase.description} (Ref: ${purchase.reference}).`;
+        const msg = `Hello LCX STUDIOS! 🎉 I've made a payment of R${Number(purchase.amount).toLocaleString()} for: ${purchase.description}. Please respond to confirm my order and next steps. Ref: ${purchase.reference?.substring(0, 20)}`;
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
