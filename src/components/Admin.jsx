@@ -8,11 +8,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 export default function Admin() {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [profiles, setProfiles] = useState([]);
     const [sites, setSites] = useState([]);
     const [portfolioItems, setPortfolioItems] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isPinVerified, setIsPinVerified] = useState(false);
+    const [pinInput, setPinInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
     const navigate = useNavigate();
@@ -30,35 +31,24 @@ export default function Admin() {
     });
 
     useEffect(() => {
-        checkAdminStatus();
+        const savedPin = localStorage.getItem('adminPin');
+        if (savedPin === '1965') {
+            setIsPinVerified(true);
+            fetchData();
+        }
     }, []);
 
-    async function checkAdminStatus() {
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate('/login');
-                return;
-            }
-
-            const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('is_admin')
-                .eq('id', session.user.id)
-                .single();
-
-            if (error || !profile?.is_admin) {
-                navigate('/');
-                return;
-            }
-
-            setIsAdmin(true);
+    const handlePinSubmit = (e) => {
+        e.preventDefault();
+        if (pinInput === '1965') {
+            localStorage.setItem('adminPin', '1965');
+            setIsPinVerified(true);
             fetchData();
-        } catch (error) {
-            console.error('Error checking admin status:', error);
-            navigate('/');
+        } else {
+            alert('Incorrect PIN');
+            setPinInput('');
         }
-    }
+    };
 
     async function fetchData() {
         setLoading(true);
@@ -141,7 +131,35 @@ export default function Admin() {
         setShowModal(true);
     };
 
-    if (!isAdmin) return null;
+    if (!isPinVerified) {
+        return (
+            <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white text-center">
+                <div className="max-w-md w-full bg-slate-900/50 p-10 rounded-3xl border border-slate-700 shadow-2xl backdrop-blur">
+                    <div className="mx-auto w-16 h-16 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-6">
+                        <Crown className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-2xl font-bold mb-2">Admin Control Center</h1>
+                    <p className="text-slate-400 mb-8 text-sm">Please enter the master security PIN to authorize access.</p>
+                    <form onSubmit={handlePinSubmit} className="space-y-4">
+                        <input
+                            type="password"
+                            placeholder="Enter PIN"
+                            className="w-full text-center tracking-[0.5em] text-2xl font-black bg-[#020617] border border-slate-700 rounded-xl py-4 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-600 placeholder:text-base placeholder:tracking-normal placeholder:font-normal transition-all"
+                            value={pinInput}
+                            onChange={(e) => setPinInput(e.target.value)}
+                            autoFocus
+                        />
+                        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                            Unlock Dashboard
+                        </button>
+                    </form>
+                    <button onClick={() => navigate('/')} className="mt-8 text-sm text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center w-full gap-2">
+                        <ArrowLeft size={16} /> Return to Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#020617] text-white">
