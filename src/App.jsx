@@ -334,7 +334,7 @@ function TopNav({ session, onPortalClick }) {
             <div className="mx-auto flex max-w-7xl items-center justify-between">
                 <a href="#home" className="flex items-center gap-4 transition-transform hover:scale-105">
                     <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 shadow-[0_0_50px_rgba(34,211,238,0.2)] overflow-hidden">
-                        <img src="/LCX STUDIOS LOGO.png" alt="LCX Logo" className="h-full w-full object-cover" />
+                        <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-cover" />
                     </div>
                     <div className="hidden sm:block">
                         <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-cyan-400/80">Premium Studio</div>
@@ -518,7 +518,7 @@ function Hero() {
                             className="relative z-10 flex h-[450px] w-[450px] items-center justify-center rounded-[4rem] border border-white/10 bg-white/5 p-12 shadow-[0_0_100px_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-all group-hover:border-white/20"
                         >
                             <img
-                                src="/LCX STUDIOS LOGO.png"
+                                src="/logo.png"
                                 alt="LCX Large Logo"
                                 className="h-full w-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                             />
@@ -1051,7 +1051,7 @@ function Footer() {
                     <div className="text-center md:text-left">
                         <div className="flex items-center gap-4 justify-center md:justify-start">
                             <div className="h-12 w-12 rounded-xl border border-white/10 bg-slate-900 overflow-hidden p-1">
-                                <img src="/LCX STUDIOS LOGO.png" alt="LCX Logo" className="h-full w-full object-contain" />
+                                <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-contain" />
                             </div>
                             <div className="text-2xl font-black tracking-[0.2em] text-white">LCX STUDIOS</div>
                         </div>
