@@ -26,6 +26,7 @@ import {
     ShieldCheck,
     Sparkles,
     Star,
+    User,
     WalletCards,
     Workflow,
     X,
@@ -1120,8 +1121,8 @@ export default function App() {
                         <About />
                         <Services />
                         <Portfolio />
-                        <Pricing />
-                        <RequestSystem />
+                        <PricingCards />
+                        <RequestForm />
                         <Contact />
                         <Footer />
                     </motion.div>
@@ -1157,7 +1158,7 @@ export default function App() {
                 )}
             </AnimatePresence>
 
-            <ChatWidget />
+            <SmartChatWidget />
         </div>
     );
 }
