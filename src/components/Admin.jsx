@@ -144,12 +144,12 @@ export default function Admin() {
     if (!isAdmin) return null;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-950">
+        <div className="min-h-screen bg-[#020617] text-white">
             {/* Header */}
             <div className="bg-slate-950 text-white p-6 sticky top-0 z-40 shadow-xl">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/')} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
+                        <button onClick={() => navigate('/')} className="p-2 rounded-xl bg-slate-950/5 hover:bg-slate-950/10 transition-all">
                             <ArrowLeft size={20} />
                         </button>
                         <div>
@@ -157,7 +157,7 @@ export default function Admin() {
                             <h1 className="text-xl font-bold">Admin Dashboard</h1>
                         </div>
                     </div>
-                    <div className="flex bg-white/10 p-1 rounded-2xl">
+                    <div className="flex bg-slate-950/10 p-1 rounded-2xl">
                         <button
                             className={cn("px-6 py-2 rounded-xl text-sm font-bold transition-all", activeTab === 'overview' ? "bg-blue-600 text-white" : "text-white/60 hover:text-white")}
                             onClick={() => setActiveTab('overview')}
@@ -194,14 +194,14 @@ export default function Admin() {
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                         <input
                                             type="text" placeholder="Search users..."
-                                            className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+                                            className="pl-10 pr-4 py-2 rounded-xl border border-white/10 bg-slate-950 text-sm focus:outline-none focus:border-blue-500 transition-all shadow-sm"
                                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                                         />
                                     </div>
                                 </div>
-                                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                <div className="bg-slate-950 rounded-3xl border border-white/10 overflow-hidden shadow-sm">
                                     <table className="w-full text-left">
-                                        <thead className="bg-slate-50 border-b border-slate-200">
+                                        <thead className="bg-[#020617] border-b border-white/10">
                                             <tr>
                                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">User</th>
                                                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Status</th>
@@ -211,25 +211,25 @@ export default function Admin() {
                                         <tbody className="divide-y divide-slate-100">
                                             {loading ? <tr><td colSpan="3" className="px-6 py-10 text-center text-slate-400">Loading...</td></tr> :
                                                 filteredProfiles.map(profile => (
-                                                    <tr key={profile.id} className="hover:bg-slate-50/50 transition-colors">
+                                                    <tr key={profile.id} className="hover:bg-[#020617]/50 transition-colors">
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200 overflow-hidden">
+                                                                <div className="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 border border-white/10 overflow-hidden">
                                                                     {profile.avatar_url ? <img src={profile.avatar_url} className="h-full w-full object-cover" /> : <Users size={18} />}
                                                                 </div>
                                                                 <div>
-                                                                    <div className="font-bold text-slate-900">{profile.full_name || 'Anonymous User'}</div>
+                                                                    <div className="font-bold text-white">{profile.full_name || 'Anonymous User'}</div>
                                                                     <div className="text-xs text-slate-500">@{profile.username || 'no-username'}</div>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", profile.is_admin ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500")}>
+                                                            <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", profile.is_admin ? "bg-blue-100 text-blue-600" : "bg-slate-900 text-slate-500")}>
                                                                 {profile.is_admin ? 'Admin' : 'Client'}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 text-right text-slate-400">
-                                                            <button className="hover:text-slate-950"><MoreVertical size={18} /></button>
+                                                            <button className="hover:text-white"><MoreVertical size={18} /></button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -245,18 +245,18 @@ export default function Admin() {
                                 </h3>
                                 <div className="space-y-4">
                                     {sites.length === 0 ? (
-                                        <div className="p-8 rounded-3xl border border-dashed border-slate-300 text-center text-slate-400">
+                                        <div className="p-8 rounded-3xl border border-dashed border-white/20 text-center text-slate-400">
                                             <Globe size={32} className="mx-auto mb-4 text-slate-200" /> No sites tracked yet.
                                         </div>
                                     ) : sites.map(site => (
-                                        <div key={site.id} className="p-6 rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all">
+                                        <div key={site.id} className="p-6 rounded-3xl border border-white/10 bg-slate-950 shadow-sm hover:shadow-md transition-all">
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="h-10 w-10 rounded-xl bg-cyan-50 text-cyan-500 flex items-center justify-center"><Globe size={20} /></div>
                                                 <span className={cn("px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest", site.status === 'live' ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600")}>
                                                     {site.status}
                                                 </span>
                                             </div>
-                                            <h4 className="font-bold text-slate-950 mb-1">{site.name}</h4>
+                                            <h4 className="font-bold text-white mb-1">{site.name}</h4>
                                             <p className="text-xs text-slate-500 flex items-center gap-1 mb-4"><Users size={12} /> Owner: {site.profiles?.full_name || 'Unknown'}</p>
                                             {site.url && <a href={site.url} target="_blank" className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">Visit Site <ExternalLink size={12} /></a>}
                                         </div>
@@ -268,7 +268,7 @@ export default function Admin() {
                 ) : (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-3xl font-bold tracking-tight text-slate-950 flex items-center gap-3">
+                            <h2 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
                                 <ImageIcon className="text-blue-500" /> Portfolio Content Manager
                             </h2>
                             <button
@@ -281,35 +281,35 @@ export default function Admin() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {portfolioItems.length === 0 && !loading && (
-                                <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
+                                <div className="col-span-full py-20 text-center border-2 border-dashed border-white/10 rounded-[3rem]">
                                     <ImageIcon size={48} className="mx-auto mb-4 text-slate-300" />
-                                    <h3 className="text-xl font-bold text-slate-900 mb-2">No portfolio items</h3>
+                                    <h3 className="text-xl font-bold text-white mb-2">No portfolio items</h3>
                                     <p className="text-slate-500 mb-6">Create your first portfolio item to display it on the main site.</p>
                                     <button onClick={openCreateModal} className="text-blue-600 font-bold hover:underline">Create Item</button>
                                 </div>
                             )}
 
                             {portfolioItems.map(item => (
-                                <div key={item.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm group">
-                                    <div className="aspect-[4/3] relative bg-slate-100">
+                                <div key={item.id} className="bg-slate-950 rounded-3xl border border-white/10 overflow-hidden shadow-sm group">
+                                    <div className="aspect-[4/3] relative bg-slate-900">
                                         {item.cover_image ? (
                                             <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={48} /></div>
                                         )}
                                         <div className="absolute top-4 left-4">
-                                            <span className="bg-white/90 backdrop-blur text-slate-900 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
+                                            <span className="bg-slate-950/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
                                                 {item.category}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="p-6">
-                                        <h3 className="font-bold text-lg text-slate-900 mb-2 truncate">{item.title}</h3>
+                                        <h3 className="font-bold text-lg text-white mb-2 truncate">{item.title}</h3>
                                         <p className="text-sm text-slate-500 line-clamp-2 mb-6">{item.description}</p>
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => editItem(item)}
-                                                className="flex-1 flex items-center justify-center gap-2 bg-slate-100 text-slate-700 py-2 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors"
+                                                className="flex-1 flex items-center justify-center gap-2 bg-slate-900 text-slate-300 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors"
                                             >
                                                 <Edit2 size={16} /> Edit
                                             </button>
@@ -335,13 +335,13 @@ export default function Admin() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-slate-200"
+                            className="bg-slate-950 rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-white/10"
                         >
-                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-100 bg-slate-50/50">
-                                <h3 className="text-2xl font-bold text-slate-900">
+                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-white/5 bg-[#020617]/50">
+                                <h3 className="text-2xl font-bold text-white">
                                     {editingId ? 'Edit Portfolio Item' : 'New Portfolio Item'}
                                 </h3>
-                                <button onClick={() => setShowModal(false)} className="p-2 bg-slate-200 rounded-full hover:bg-slate-300 transition-colors">
+                                <button onClick={() => setShowModal(false)} className="p-2 bg-slate-800 rounded-full hover:bg-slate-300 transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -350,12 +350,12 @@ export default function Admin() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Title</label>
-                                        <input required className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none"
+                                        <input required className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none"
                                             value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="e.g. Miss Qhawekazi Voting Platform" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Category</label>
-                                        <select required className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none"
+                                        <select required className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none"
                                             value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
                                             <option>Voting Platform</option>
                                             <option>Internal Business System</option>
@@ -367,32 +367,32 @@ export default function Admin() {
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Description</label>
-                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none resize-none"
+                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none"
                                         value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Brief description of the work..." />
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Badge text (Optional)</label>
-                                        <input className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none"
+                                        <input className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none"
                                             value={form.badge} onChange={e => setForm({ ...form, badge: e.target.value })} placeholder="e.g. Featured SaaS" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Cover Image URL</label>
-                                        <input className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none"
+                                        <input className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none"
                                             value={form.cover_image} onChange={e => setForm({ ...form, cover_image: e.target.value })} placeholder="https://..." />
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Gallery Images (URLs, one per line)</label>
-                                    <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:border-blue-500 focus:outline-none resize-none placeholder:text-slate-400 font-mono text-sm leading-relaxed whitespace-pre"
+                                    <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-white/10 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none placeholder:text-slate-400 font-mono text-sm leading-relaxed whitespace-pre"
                                         value={form.gallery_images} onChange={e => setForm({ ...form, gallery_images: e.target.value })}
                                         placeholder="https://image1.com/img.jpg&#10;https://image2.com/img.jpg" />
                                 </div>
 
-                                <div className="pt-4 border-t border-slate-100 flex justify-end gap-4">
-                                    <button type="button" onClick={() => setShowModal(false)} className="px-6 py-3 font-bold text-slate-500 hover:text-slate-900 transition-colors">Cancel</button>
+                                <div className="pt-4 border-t border-white/5 flex justify-end gap-4">
+                                    <button type="button" onClick={() => setShowModal(false)} className="px-6 py-3 font-bold text-slate-500 hover:text-white transition-colors">Cancel</button>
                                     <button type="submit" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-500 transition-colors active:scale-95">Save Item</button>
                                 </div>
                             </form>
@@ -406,14 +406,14 @@ export default function Admin() {
 
 function StatCard({ icon, label, value }) {
     return (
-        <div className="p-8 rounded-[2.5rem] border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+        <div className="p-8 rounded-[2.5rem] border border-white/10 bg-slate-950 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4 mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-2xl bg-[#020617] flex items-center justify-center">
                     {icon}
                 </div>
                 <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">{label}</div>
             </div>
-            <div className="text-4xl font-black text-slate-950 tracking-tight">{value}</div>
+            <div className="text-4xl font-black text-white tracking-tight">{value}</div>
         </div>
     );
 }

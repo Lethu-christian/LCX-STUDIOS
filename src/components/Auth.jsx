@@ -52,10 +52,10 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-white border border-slate-300 shadow-2xl">
+        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-slate-950 border border-white/20 shadow-2xl">
             <button
                 onClick={onBack}
-                className="absolute top-6 left-6 p-2 rounded-full bg-slate-50 hover:bg-slate-950 hover:text-white text-slate-500 transition-all"
+                className="absolute top-6 left-6 p-2 rounded-full bg-[#020617] hover:bg-slate-950 hover:text-white text-slate-500 transition-all"
             >
                 <ArrowLeft size={18} />
             </button>
@@ -64,10 +64,10 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                 <div className="inline-flex p-3 rounded-2xl bg-blue-50 text-blue-600 mb-4">
                     {isLogin ? <LogIn size={28} /> : <UserPlus size={28} />}
                 </div>
-                <h2 className="text-3xl font-bold text-slate-950 mb-2">
+                <h2 className="text-3xl font-bold text-white mb-2">
                     {isLogin ? 'Welcome Back' : 'Join LCX STUDIOS'}
                 </h2>
-                <p className="text-slate-600">
+                <p className="text-slate-400">
                     {isLogin ? 'Login to manage your business systems' : 'Create an account to get started'}
                 </p>
             </div>
@@ -81,7 +81,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                             placeholder="Email Address"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-white border border-slate-200 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
+                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -92,7 +92,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-white border border-slate-200 text-slate-950 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
+                            className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -121,7 +121,7 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                 </button>
             </form>
 
-            <p className="mt-8 text-center text-slate-600">
+            <p className="mt-8 text-center text-slate-400">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
                 <button
                     type="button"

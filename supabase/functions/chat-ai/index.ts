@@ -36,47 +36,53 @@ serve(async (req) => {
   try {
     const { messages } = await req.json()
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
       return new Response(
         JSON.stringify({
-          error: "AI is currently resting. Please set up the OPENAI_API_KEY to activate LCX AI."
+          error: "AI is currently resting. Please set up the GEMINI_API_KEY to activate LCX AI."
         }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 } // Send 200 so UI can show it cleanly
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
       )
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Convert OpenAI messages format to Gemini format
+    const geminiContents = messages.map((msg: any) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
+        system_instruction: {
+          parts: [{ text: SYSTEM_PROMPT }]
+        },
+        contents: geminiContents,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500,
+        }
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("OpenAI API Error:", data);
-      throw new Error(data.error?.message || "Failed to fetch response from OpenAI");
+      console.error("Gemini API Error:", data);
+      throw new Error(data.error?.message || "Failed to fetch response from Gemini");
     }
 
-    const reply = data.choices[0].message.content;
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't formulate a response.";
 
     return new Response(
       JSON.stringify({ reply }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error("Function error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

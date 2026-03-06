@@ -322,7 +322,7 @@ function SectionHeading({ eyebrow, title, description, center = false, theme = "
                 viewport={{ once: true }}
                 className={cn(
                     "mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.3em] backdrop-blur-xl",
-                    isDark ? "border-white/10 bg-white/5 text-cyan-400" : "border-slate-300 bg-slate-100 text-slate-950"
+                    isDark ? "border-white/10 bg-slate-950/5 text-cyan-400" : "border-white/20 bg-slate-900 text-white"
                 )}
             >
                 <Sparkles className="h-3 w-3" />
@@ -335,7 +335,7 @@ function SectionHeading({ eyebrow, title, description, center = false, theme = "
                 transition={{ delay: 0.1 }}
                 className={cn(
                     "text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl",
-                    isDark ? "text-white" : "text-slate-950"
+                    isDark ? "text-white" : "text-white"
                 )}
             >
                 {title}
@@ -347,7 +347,7 @@ function SectionHeading({ eyebrow, title, description, center = false, theme = "
                 transition={{ delay: 0.2 }}
                 className={cn(
                     "mt-6 text-base leading-8 sm:text-lg",
-                    isDark ? "text-slate-400" : "text-slate-600"
+                    isDark ? "text-slate-400" : "text-slate-400"
                 )}
             >
                 {description}
@@ -369,22 +369,22 @@ function TopNav({ session, onPortalClick }) {
     return (
         <header className={cn(
             "fixed top-0 z-50 w-full transition-all duration-300",
-            scrolled ? "border-b border-slate-200 bg-white/80 p-4 backdrop-blur-xl" : "bg-transparent p-6"
+            scrolled ? "border-b border-white/10 bg-slate-950/80 p-4 backdrop-blur-xl" : "bg-transparent p-6"
         )}>
             <div className="mx-auto flex max-w-7xl items-center justify-between">
                 <a href="#home" className="flex items-center gap-4 transition-transform hover:scale-105">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 shadow-[0_0_50px_rgba(34,211,238,0.2)] overflow-hidden">
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-[#020617] shadow-[0_0_50px_rgba(34,211,238,0.2)] overflow-hidden">
                         <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-cover" />
                     </div>
                     <div className="hidden sm:block">
                         <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-cyan-400/80">Premium Studio</div>
-                        <div className="text-xl font-black tracking-[0.2em] text-slate-950">LCX STUDIOS</div>
+                        <div className="text-xl font-black tracking-[0.2em] text-white">LCX STUDIOS</div>
                     </div>
                 </a>
 
                 <nav className="hidden items-center gap-8 md:flex">
                     {navItems.map((item) => (
-                        <a key={item.href} href={item.href} className="text-sm font-medium text-slate-600 transition hover:text-cyan-300">
+                        <a key={item.href} href={item.href} className="text-sm font-medium text-slate-400 transition hover:text-cyan-300">
                             {item.label}
                         </a>
                     ))}
@@ -411,7 +411,7 @@ function TopNav({ session, onPortalClick }) {
 
                     <button
                         onClick={() => setOpen(!open)}
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-950 transition hover:bg-slate-200 md:hidden"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 text-white transition hover:bg-slate-800 md:hidden"
                     >
                         {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </button>
@@ -424,17 +424,17 @@ function TopNav({ session, onPortalClick }) {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50/95 p-6 backdrop-blur-2xl md:hidden"
+                        className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-[#020617]/95 p-6 backdrop-blur-2xl md:hidden"
                     >
                         <div className="flex flex-col gap-6">
                             {navItems.map((item) => (
-                                <a key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-lg font-medium text-slate-700 transition hover:text-cyan-300">
+                                <a key={item.href} href={item.href} onClick={() => setOpen(false)} className="text-lg font-medium text-slate-300 transition hover:text-cyan-300">
                                     {item.label}
                                 </a>
                             ))}
                             <button
                                 onClick={() => { setOpen(false); onPortalClick(); }}
-                                className="flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-slate-100 py-4 text-sm font-bold uppercase tracking-widest text-slate-950 transition hover:bg-slate-200"
+                                className="flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-slate-900 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-slate-800"
                             >
                                 {session ? <LayoutDashboard className="h-5 w-5" /> : <User className="h-5 w-5" />}
                                 {session ? "Access Portal" : "Login / Register"}
@@ -443,7 +443,7 @@ function TopNav({ session, onPortalClick }) {
                                 href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-500 py-4 text-sm font-bold text-slate-950"
+                                className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-500 py-4 text-sm font-bold text-white"
                             >
                                 <MessageCircle className="h-5 w-5" />
                                 Chat on WhatsApp
@@ -460,9 +460,9 @@ function Hero() {
     return (
         <section id="home" className="relative min-h-screen overflow-hidden pt-32 lg:pt-0 lg:flex lg:items-center">
             {/* Background Effects */}
-            <div className="absolute inset-0 z-0 text-slate-950">
+            <div className="absolute inset-0 z-0 text-white">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.08),transparent_50%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_40%)]" />
-                <div className="absolute inset-0 bg-white" />
+                <div className="absolute inset-0 bg-slate-950" />
                 <div className="absolute inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(15,23,42,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.1)_1px,transparent_1px)] [background-size:100px_100px]" />
 
                 {/* Animated Glows */}
@@ -483,11 +483,11 @@ function Hero() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-slate-300 bg-slate-100 px-5 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-slate-950 backdrop-blur-xl"
+                        className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/20 bg-slate-900 px-5 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-white backdrop-blur-xl"
                     >
                         <div className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-950 opacity-75"></span>
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-950"></span>
                         </div>
                         Premium Technology Studio
                     </motion.div>
@@ -496,16 +496,16 @@ function Hero() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl font-bold tracking-tighter text-slate-950 sm:text-6xl md:text-7xl lg:text-8xl"
+                        className="text-5xl font-bold tracking-tighter text-white sm:text-6xl md:text-7xl lg:text-8xl"
                     >
-                        LCX STUDIOS builds <span className="text-slate-950 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">high-end</span> digital systems.
+                        LCX STUDIOS builds <span className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">high-end</span> digital systems.
                     </motion.h1>
 
                     <motion.p
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-700 md:text-xl"
+                        className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-300 md:text-xl"
                     >
                         A premium technology and creative studio crafting custom internal systems, SaaS platforms,
                         and elite visual identities for modern brands and businesses.
@@ -517,13 +517,13 @@ function Hero() {
                         transition={{ delay: 0.3 }}
                         className="mt-12 flex flex-wrap gap-5"
                     >
-                        <a href="#services" className="group relative overflow-hidden rounded-full bg-white px-8 py-5 text-sm font-bold text-slate-950 transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
+                        <a href="#services" className="group relative overflow-hidden rounded-full bg-slate-950 px-8 py-5 text-sm font-bold text-white transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
                             View Services
                         </a>
-                        <a href="#pricing" className="glass-card border-slate-300 rounded-full px-8 py-5 text-sm font-bold text-slate-950 transition-all hover:bg-slate-200">
+                        <a href="#pricing" className="glass-card border-white/20 rounded-full px-8 py-5 text-sm font-bold text-white transition-all hover:bg-slate-800">
                             Buy a Service
                         </a>
-                        <a href="#request" className="flex items-center gap-2 px-4 py-5 font-bold text-slate-950 transition-colors hover:text-slate-200">
+                        <a href="#request" className="flex items-center gap-2 px-4 py-5 font-bold text-white transition-colors hover:text-slate-200">
                             Request System <ArrowRight className="h-4 w-4" />
                         </a>
                     </motion.div>
@@ -532,7 +532,7 @@ function Hero() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="mt-16 grid grid-cols-2 gap-6 border-t border-slate-100 pt-12 text-slate-500 sm:grid-cols-4"
+                        className="mt-16 grid grid-cols-2 gap-6 border-t border-white/5 pt-12 text-slate-500 sm:grid-cols-4"
                     >
                         {[
                             { val: "100%", label: "Custom Code" },
@@ -541,7 +541,7 @@ function Hero() {
                             { val: "Premium", label: "Visuals" },
                         ].map((stat) => (
                             <div key={stat.label}>
-                                <div className="text-xl font-bold text-slate-950">{stat.val}</div>
+                                <div className="text-xl font-bold text-white">{stat.val}</div>
                                 <div className="text-[10px] uppercase tracking-widest">{stat.label}</div>
                             </div>
                         ))}
@@ -554,7 +554,7 @@ function Hero() {
                     transition={{ duration: 1, delay: 0.2 }}
                     className="relative flex items-center justify-center lg:block"
                 >
-                    <div className="absolute -inset-10 bg-slate-100 blur-[100px]" />
+                    <div className="absolute -inset-10 bg-slate-900 blur-[100px]" />
                     <div className="relative group">
                         <motion.div
                             animate={{
@@ -562,7 +562,7 @@ function Hero() {
                                 rotateY: [0, 5, 0],
                             }}
                             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                            className="relative z-10 flex h-[450px] w-[450px] items-center justify-center rounded-[4rem] border border-slate-200 bg-slate-100 p-12 shadow-[0_0_100px_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-all group-hover:border-slate-300"
+                            className="relative z-10 flex h-[450px] w-[450px] items-center justify-center rounded-[4rem] border border-white/10 bg-slate-900 p-12 shadow-[0_0_100px_rgba(255,255,255,0.05)] backdrop-blur-2xl transition-all group-hover:border-white/20"
                         >
                             <img
                                 src="/logo.png"
@@ -586,7 +586,7 @@ function About() {
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="grid gap-20 lg:grid-cols-2">
                     <div className="space-y-8">
-                        <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">
+                        <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">
                             Visionary Logic
                         </div>
                         <h2 className="text-5xl font-black tracking-tight text-white lg:text-7xl leading-[1.1]">
@@ -625,7 +625,7 @@ function About() {
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: id * 0.1 }}
-                                className="group relative rounded-3xl border border-white/5 bg-white/5 p-8 transition-all hover:bg-white/10"
+                                className="group relative rounded-3xl border border-white/5 bg-slate-950/5 p-8 transition-all hover:bg-slate-950/10"
                             >
                                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
                                     <item.icon className="h-6 w-6" />
@@ -643,7 +643,7 @@ function About() {
 
 function Services() {
     return (
-        <section id="services" className="relative bg-slate-50 py-32">
+        <section id="services" className="relative bg-[#020617] py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
                     eyebrow="Capabilities"
@@ -660,31 +660,31 @@ function Services() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="group glass-card relative rounded-[3rem] p-10 transition-all hover:bg-white/[0.08]"
+                            className="group glass-card relative rounded-[3rem] p-10 transition-all hover:bg-slate-950/[0.08]"
                         >
                             <div className="flex items-start justify-between">
-                                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-200 text-slate-950">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-800 text-white">
                                     <service.icon className="h-8 w-8" />
                                 </div>
                                 <a
                                     href={createWhatsAppLink(service.whatsapp)}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="rounded-full border border-slate-300 bg-slate-100 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-700 transition-all hover:text-slate-950"
+                                    className="rounded-full border border-white/20 bg-slate-900 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-300 transition-all hover:text-white"
                                 >
                                     WhatsApp <ChevronRight className="ml-2 inline h-4 w-4" />
                                 </a>
                             </div>
 
-                            <h3 className="mt-10 text-3xl font-bold text-slate-950 tracking-tight">{service.title}</h3>
-                            <p className="mt-6 text-slate-600 leading-relaxed max-w-lg">
+                            <h3 className="mt-10 text-3xl font-bold text-white tracking-tight">{service.title}</h3>
+                            <p className="mt-6 text-slate-400 leading-relaxed max-w-lg">
                                 {service.desc}
                             </p>
 
                             <div className="mt-10 grid gap-4 grid-cols-1 sm:grid-cols-2">
                                 {service.points.map((point) => (
-                                    <div key={point} className="flex items-center gap-3 rounded-2xl bg-slate-100 px-5 py-4 text-xs font-medium text-slate-700">
-                                        <CheckCircle2 className="h-4 w-4 text-slate-950 shrink-0" />
+                                    <div key={point} className="flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-4 text-xs font-medium text-slate-300">
+                                        <CheckCircle2 className="h-4 w-4 text-white shrink-0" />
                                         {point}
                                     </div>
                                 ))}
@@ -729,7 +729,7 @@ function PricingCards() {
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
-                                className="rounded-3xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10 flex flex-col"
+                                className="rounded-3xl border border-white/10 bg-slate-950/5 p-8 transition-all hover:bg-slate-950/10 flex flex-col"
                             >
                                 <h4 className="text-lg font-bold text-white">{pkg.name}</h4>
                                 <div className="mt-2 text-3xl font-black text-blue-400">{pkg.price}</div>
@@ -779,7 +779,7 @@ function PricingCards() {
                             transition={{ delay: i * 0.1 }}
                             className={cn(
                                 "relative flex flex-col rounded-[2.5rem] border p-10 transition-all hover:scale-[1.02]",
-                                pkg.featured ? "border-blue-500 bg-white/5 shadow-[0_0_50px_rgba(59,130,246,0.1)]" : "border-white/10 bg-white/5"
+                                pkg.featured ? "border-blue-500 bg-slate-950/5 shadow-[0_0_50px_rgba(59,130,246,0.1)]" : "border-white/10 bg-slate-950/5"
                             )}
                         >
                             <div className="mb-8">
@@ -817,7 +817,7 @@ function PricingCards() {
                                     onClick={() => handlePurchase(pkg)}
                                     className={cn(
                                         "flex items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold uppercase tracking-widest transition-all",
-                                        pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500" : "bg-white/10 text-white hover:bg-white/20"
+                                        pkg.featured ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500" : "bg-slate-950/10 text-white hover:bg-slate-950/20"
                                     )}
                                 >
                                     <WalletCards className="h-5 w-5" />
@@ -830,7 +830,7 @@ function PricingCards() {
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        className="lg:col-span-2 mt-4 relative flex flex-col md:flex-row items-center justify-between gap-8 rounded-[2.5rem] border border-white/10 bg-white/5 p-10 transition-all"
+                        className="lg:col-span-2 mt-4 relative flex flex-col md:flex-row items-center justify-between gap-8 rounded-[2.5rem] border border-white/10 bg-slate-950/5 p-10 transition-all"
                     >
                         <div>
                             <h3 className="text-2xl font-bold text-white">Custom Internal Software</h3>
@@ -844,7 +844,7 @@ function PricingCards() {
                             href={createWhatsAppLink("Hello, I want a custom internal software system.")}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-transparent py-4 px-8 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-white/10 shrink-0"
+                            className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-transparent py-4 px-8 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-slate-950/10 shrink-0"
                         >
                             <MessageCircle className="h-5 w-5" />
                             Request System
@@ -881,7 +881,7 @@ function Portfolio() {
     }, []);
 
     return (
-        <section id="portfolio" className="relative bg-slate-50 py-32">
+        <section id="portfolio" className="relative bg-[#020617] py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
                     eyebrow="Selected Works"
@@ -906,7 +906,7 @@ function Portfolio() {
                                 className="group cursor-pointer"
                                 onClick={() => setSelectedItem(item)}
                             >
-                                <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-200 bg-slate-50">
+                                <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-white/10 bg-[#020617]">
                                     <img
                                         src={item.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"}
                                         alt={item.title}
@@ -916,7 +916,7 @@ function Portfolio() {
 
                                     {item.badge && (
                                         <div className="absolute top-6 left-6 z-10">
-                                            <span className="rounded-full bg-cyan-400 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg">
+                                            <span className="rounded-full bg-cyan-400 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-lg">
                                                 {item.badge}
                                             </span>
                                         </div>
@@ -924,7 +924,7 @@ function Portfolio() {
 
                                     <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-8 z-10 transition-transform duration-300 group-hover:translate-y-[-8px]">
                                         <div className="mb-4">
-                                            <span className="rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-1.5 w-max">
+                                            <span className="rounded-full border border-white/20 bg-slate-950/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-1.5 w-max">
                                                 <ImageIcon size={10} /> {item.category}
                                             </span>
                                         </div>
@@ -951,14 +951,14 @@ function Portfolio() {
                     >
                         <button
                             onClick={() => setSelectedItem(null)}
-                            className="absolute top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/20"
+                            className="absolute top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/10 text-white hover:bg-slate-950/20 transition-all backdrop-blur-md border border-white/20"
                         >
                             <X size={24} />
                         </button>
 
                         <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-slate-900 border border-white/10 shadow-2xl custom-scrollbar flex flex-col flex-nowrap" onClick={e => e.stopPropagation()}>
                             <div className="p-8 md:p-12 border-b border-white/10 shrink-0">
-                                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
+                                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
                                     <ImageIcon size={12} /> {selectedItem.category}
                                 </div>
                                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">{selectedItem.title}</h2>
@@ -992,7 +992,7 @@ function Portfolio() {
 
 function PosterPricing() {
     return (
-        <section className="relative bg-white py-32 border-y border-slate-100">
+        <section className="relative bg-slate-950 py-32 border-y border-white/5">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="grid gap-20 lg:grid-cols-[0.8fr_1.2fr]">
                     <div className="flex flex-col justify-center">
@@ -1018,15 +1018,15 @@ function PosterPricing() {
                     <div className="grid gap-6 sm:grid-cols-2">
                         {posterPricing.map((item) => (
                             <div key={item.title} className="glass-card rounded-[2.5rem] p-10 hover:border-white/30 transition-all flex flex-col">
-                                <h3 className="text-xl font-bold text-slate-950">{item.title}</h3>
-                                <div className="mt-6 text-4xl font-black text-slate-950">{item.price}</div>
+                                <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                                <div className="mt-6 text-4xl font-black text-white">{item.price}</div>
                                 <div className="mt-2 text-xs font-bold uppercase tracking-widest text-slate-500">{item.note}</div>
-                                <p className="mt-6 text-sm leading-relaxed text-slate-600 flex-grow">
+                                <p className="mt-6 text-sm leading-relaxed text-slate-400 flex-grow">
                                     {item.extra}
                                 </p>
                                 <button
                                     onClick={() => handlePayment(parseInt(item.price.replace(/[^\d]/g, '')) * 100, item.title)}
-                                    className="mt-8 w-full rounded-2xl bg-white py-4 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:scale-105 active:scale-95"
+                                    className="mt-8 w-full rounded-2xl bg-slate-950 py-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95"
                                 >
                                     Buy Now
                                 </button>
@@ -1035,17 +1035,17 @@ function PosterPricing() {
 
                         <div className="sm:col-span-2 glass-card rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-r from-white/5 to-transparent">
                             <div>
-                                <h3 className="text-2xl font-bold text-slate-950 tracking-tight">Logo & Identity Systems</h3>
-                                <p className="mt-2 text-slate-600 max-w-md">Modern concepts for brands, companies, events, and individuals starting from R5,000.</p>
+                                <h3 className="text-2xl font-bold text-white tracking-tight">Logo & Identity Systems</h3>
+                                <p className="mt-2 text-slate-400 max-w-md">Modern concepts for brands, companies, events, and individuals starting from R5,000.</p>
                             </div>
                             <div className="flex flex-wrap gap-4">
                                 <button
                                     onClick={() => handlePayment(500000, "Logo & Identity Systems")}
-                                    className="flex items-center gap-3 rounded-2xl bg-white px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950 transition-all hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-3 rounded-2xl bg-slate-950 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:scale-105 active:scale-95"
                                 >
                                     Buy Now
                                 </button>
-                                <a href={createWhatsAppLink("Hello, I want logo design services.")} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-100 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950 transition-all hover:bg-slate-200">
+                                <a href={createWhatsAppLink("Hello, I want logo design services.")} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-slate-800">
                                     WhatsApp <ArrowRight className="h-4 w-4" />
                                 </a>
                             </div>
@@ -1078,10 +1078,10 @@ function RequestForm() {
 
     const handleChange = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-    const inputClass = "mt-3 w-full rounded-2xl border border-slate-100 bg-slate-100 px-6 py-4 text-sm text-slate-950 outline-none focus:border-cyan-400/50 transition-colors placeholder:text-slate-600";
+    const inputClass = "mt-3 w-full rounded-2xl border border-white/5 bg-slate-900 px-6 py-4 text-sm text-white outline-none focus:border-cyan-400/50 transition-colors placeholder:text-slate-400";
 
     return (
-        <section id="request" className="relative bg-slate-50 py-32">
+        <section id="request" className="relative bg-[#020617] py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <SectionHeading
                     eyebrow="Project Intake"
@@ -1130,7 +1130,7 @@ function RequestForm() {
                                 href={whatsappHref}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 py-6 text-sm font-black uppercase tracking-widest text-slate-950 transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(34,211,238,0.3)] shadow-2xl"
+                                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-cyan-500 py-6 text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(34,211,238,0.3)] shadow-2xl"
                             >
                                 <Send className="h-5 w-5" />
                                 Submit via WhatsApp
@@ -1145,7 +1145,7 @@ function RequestForm() {
 
 function Contact() {
     return (
-        <section id="contact" className="relative bg-white py-32">
+        <section id="contact" className="relative bg-slate-950 py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="grid gap-10 lg:grid-cols-3">
                     {[
@@ -1174,13 +1174,13 @@ function Contact() {
                         <a
                             key={item.title}
                             href={item.href}
-                            className="group glass-card rounded-[3rem] p-10 transition-all hover:bg-slate-200"
+                            className="group glass-card rounded-[3rem] p-10 transition-all hover:bg-slate-800"
                         >
                             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 transition-transform group-hover:scale-110">
                                 <item.icon className="h-8 w-8" />
                             </div>
-                            <h3 className="mt-8 text-2xl font-bold text-slate-950 tracking-tight">{item.title}</h3>
-                            <p className="mt-2 font-medium text-slate-600">{item.value}</p>
+                            <h3 className="mt-8 text-2xl font-bold text-white tracking-tight">{item.title}</h3>
+                            <p className="mt-2 font-medium text-slate-400">{item.value}</p>
                             <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-400">
                                 {item.label} <ArrowRight className="h-4 w-4" />
                             </div>
@@ -1245,7 +1245,7 @@ function SmartChatWidget() {
         <>
             <button
                 onClick={() => setOpen(!open)}
-                className="fixed bottom-8 right-8 z-[60] flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500 text-slate-950 shadow-2xl transition-transform hover:scale-110 active:scale-95 shadow-cyan-500/20"
+                className="fixed bottom-8 right-8 z-[60] flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500 text-white shadow-2xl transition-transform hover:scale-110 active:scale-95 shadow-cyan-500/20"
             >
                 <AnimatePresence mode="wait">
                     {open ? <X key="x" className="h-7 w-7" /> : <Bot key="bot" className="h-7 w-7" />}
@@ -1258,28 +1258,28 @@ function SmartChatWidget() {
                         initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="fixed bottom-28 right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[600px] max-h-[70vh]"
+                        className="fixed bottom-28 right-8 z-50 w-[min(calc(100vw-2rem),400px)] overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#020617]/90 shadow-2xl backdrop-blur-2xl flex flex-col h-[600px] max-h-[70vh]"
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-slate-950 shrink-0">
-                            <div className="text-sm font-black uppercase tracking-widest text-slate-950/60 flex items-center gap-2">
+                        <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-8 text-white shrink-0">
+                            <div className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center gap-2">
                                 <Sparkles className="h-4 w-4" /> LCX AI
                             </div>
                             <h3 className="mt-1 text-2xl font-black tracking-tight">How can I help?</h3>
-                            <p className="mt-2 text-xs font-bold text-slate-950/70 leading-relaxed">
+                            <p className="mt-2 text-xs font-bold text-white/70 leading-relaxed">
                                 Ask me about pricing, services, or how to get started.
                             </p>
                         </div>
 
                         {/* Chat Messages Area */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[#020617]/50">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                                     <div className={cn(
                                         "max-w-[85%] rounded-[1.5rem] px-5 py-3.5 text-sm leading-relaxed",
                                         msg.role === "user"
-                                            ? "bg-cyan-500 text-slate-950 font-medium rounded-tr-sm"
-                                            : "bg-white border border-slate-200 text-slate-700 shadow-sm rounded-tl-sm"
+                                            ? "bg-cyan-500 text-white font-medium rounded-tr-sm"
+                                            : "bg-slate-950 border border-white/10 text-slate-300 shadow-sm rounded-tl-sm"
                                     )}>
                                         {msg.content}
                                     </div>
@@ -1288,7 +1288,7 @@ function SmartChatWidget() {
 
                             {isLoading && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white border border-slate-200 text-slate-400 rounded-[1.5rem] rounded-tl-sm px-5 py-4 shadow-sm flex gap-1.5 items-center">
+                                    <div className="bg-slate-950 border border-white/10 text-slate-400 rounded-[1.5rem] rounded-tl-sm px-5 py-4 shadow-sm flex gap-1.5 items-center">
                                         <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0 }} className="w-2 h-2 rounded-full bg-slate-300" />
                                         <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-2 h-2 rounded-full bg-slate-300" />
                                         <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-2 h-2 rounded-full bg-slate-300" />
@@ -1299,11 +1299,11 @@ function SmartChatWidget() {
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-4 bg-white border-t border-slate-100 shrink-0">
+                        <div className="p-4 bg-slate-950 border-t border-white/5 shrink-0">
                             <form onSubmit={handleSendMessage} className="relative flex items-center">
                                 <input
                                     type="text"
-                                    className="w-full rounded-full border border-slate-200 bg-slate-50 pl-6 pr-14 py-4 text-sm text-slate-950 outline-none focus:border-cyan-400 focus:bg-white transition-all placeholder:text-slate-400"
+                                    className="w-full rounded-full border border-white/10 bg-[#020617] pl-6 pr-14 py-4 text-sm text-white outline-none focus:border-cyan-400 focus:bg-slate-950 transition-all placeholder:text-slate-400"
                                     placeholder="Type your message..."
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
@@ -1312,7 +1312,7 @@ function SmartChatWidget() {
                                 <button
                                     type="submit"
                                     disabled={!input.trim() || isLoading}
-                                    className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500 text-slate-950 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                                    className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500 text-white transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
                                 >
                                     <Send className="h-4 w-4" />
                                 </button>
@@ -1399,7 +1399,7 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen bg-white selection:bg-white selection:text-slate-950 flex flex-col">
+        <div className="min-h-screen bg-slate-950 selection:bg-slate-950 selection:text-white flex flex-col">
             <TopNav session={session} onPortalClick={handlePortalClick} />
 
             <div className="flex-grow">
@@ -1475,7 +1475,7 @@ export default function App() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 bg-slate-50 min-h-screen"
+                                className="pt-32 pb-20 bg-[#020617] min-h-screen"
                             >
                                 <Admin />
                             </motion.div>
