@@ -311,14 +311,18 @@ function handlePayment(amountInCents, description) {
     });
 }
 
-function SectionHeading({ eyebrow, title, description, center = false }) {
+function SectionHeading({ eyebrow, title, description, center = false, theme = "light" }) {
+    const isDark = theme === "dark";
     return (
         <div className={cn("max-w-3xl", center && "mx-auto text-center")}>
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-100 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-950 backdrop-blur-xl"
+                className={cn(
+                    "mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.3em] backdrop-blur-xl",
+                    isDark ? "border-white/10 bg-white/5 text-cyan-400" : "border-slate-300 bg-slate-100 text-slate-950"
+                )}
             >
                 <Sparkles className="h-3 w-3" />
                 {eyebrow}
@@ -328,7 +332,10 @@ function SectionHeading({ eyebrow, title, description, center = false }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl md:text-5xl lg:text-6xl"
+                className={cn(
+                    "text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl",
+                    isDark ? "text-white" : "text-slate-950"
+                )}
             >
                 {title}
             </motion.h2>
@@ -337,7 +344,10 @@ function SectionHeading({ eyebrow, title, description, center = false }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="mt-6 text-base leading-8 text-slate-600 sm:text-lg"
+                className={cn(
+                    "mt-6 text-base leading-8 sm:text-lg",
+                    isDark ? "text-slate-400" : "text-slate-600"
+                )}
             >
                 {description}
             </motion.p>
@@ -691,11 +701,49 @@ function PricingCards() {
         <section id="pricing" className="bg-slate-950 py-32 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.1),transparent_50%)]" />
             <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+                {/* Rental Section */}
+                <div className="mb-32">
+                    <SectionHeading
+                        eyebrow="Rental Service"
+                        title="Rent the Voting System"
+                        description="Temporary usage options including custom domain & hosting. Service ends after the period."
+                        center
+                        theme="dark"
+                    />
+                    <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        {rentalPackages.map((pkg, i) => (
+                            <motion.div
+                                key={pkg.name}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="rounded-3xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10 flex flex-col"
+                            >
+                                <h4 className="text-lg font-bold text-white">{pkg.name}</h4>
+                                <div className="mt-2 text-3xl font-black text-blue-400">{pkg.price}</div>
+                                <p className="mt-4 text-xs text-slate-400 leading-relaxed flex-1">{pkg.desc}</p>
+                                <a
+                                    href={createWhatsAppLink(pkg.whatsapp)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-3 text-xs font-bold text-white transition-all hover:bg-white/20"
+                                >
+                                    Rent System
+                                </a>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-32" />
+
+                {/* Core Systems */}
                 <SectionHeading
-                    eyebrow="Pricing"
-                    title="Premium Voting Solutions"
-                    description="Choose the package that fits your event scale. All systems are custom-coded for high-end performance."
+                    eyebrow="Purchases"
+                    title="Premium Software Solutions"
+                    description="Choose the package that fits your scale. Internal systems and pageantry systems are custom-coded for high-end performance."
                     center
+                    theme="dark"
                 />
 
                 <div className="mt-20 grid gap-8 lg:grid-cols-2">
@@ -741,39 +789,30 @@ function PricingCards() {
                             </a>
                         </motion.div>
                     ))}
-                </div>
 
-                {/* Rental Section */}
-                <div className="mt-32">
-                    <SectionHeading
-                        eyebrow="Rental Service"
-                        title="Rent the Voting System"
-                        description="Temporary usage options including custom domain & hosting. Service ends after the period."
-                        center
-                    />
-                    <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {rentalPackages.map((pkg, i) => (
-                            <motion.div
-                                key={pkg.name}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="rounded-3xl border border-white/10 bg-white/5 p-8 transition-all hover:bg-white/10"
-                            >
-                                <h4 className="text-lg font-bold text-white">{pkg.name}</h4>
-                                <div className="mt-2 text-3xl font-black text-blue-400">{pkg.price}</div>
-                                <p className="mt-4 text-xs text-slate-400 leading-relaxed">{pkg.desc}</p>
-                                <a
-                                    href={createWhatsAppLink(pkg.whatsapp)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-3 text-xs font-bold text-white transition-all hover:bg-white/20"
-                                >
-                                    Rent System
-                                </a>
-                            </motion.div>
-                        ))}
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className="lg:col-span-2 mt-4 relative flex flex-col md:flex-row items-center justify-between gap-8 rounded-[2.5rem] border border-white/10 bg-white/5 p-10 transition-all"
+                    >
+                        <div>
+                            <h3 className="text-2xl font-bold text-white">Custom Internal Software</h3>
+                            <div className="mt-2 text-3xl font-black text-slate-300">Custom Quote</div>
+                            <p className="mt-4 text-sm text-slate-400 max-w-xl line-clamp-2">
+                                For businesses that need high-end dashboards, operations tracking, finance tools,
+                                inventory management, or tailored internal workflows.
+                            </p>
+                        </div>
+                        <a
+                            href={createWhatsAppLink("Hello, I want a custom internal software system.")}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-transparent py-4 px-8 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-white/10 shrink-0"
+                        >
+                            <MessageCircle className="h-5 w-5" />
+                            Request System
+                        </a>
+                    </motion.div>
                 </div>
             </div>
         </section>
@@ -781,6 +820,29 @@ function PricingCards() {
 }
 
 function Portfolio() {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    useEffect(() => {
+        async function fetchPortfolio() {
+            try {
+                const { data, error } = await supabase
+                    .from('portfolio_items')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setItems(data || []);
+            } catch (err) {
+                console.error("Error fetching portfolio items", err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchPortfolio();
+    }, []);
+
     return (
         <section id="portfolio" className="relative bg-slate-50 py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -791,40 +853,102 @@ function Portfolio() {
                     center
                 />
 
-                <div className="mt-20 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-                    {portfolioItems.map((item, i) => (
-                        <motion.div
-                            key={item.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="group cursor-pointer"
-                        >
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-200 bg-slate-50">
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="h-full w-full object-cover opacity-60 transition-all duration-700 group-hover:scale-110 group-hover:rotate-1 group-hover:opacity-80"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
+                {loading ? (
+                    <div className="mt-20 text-center text-slate-400 font-medium">Loading portfolio...</div>
+                ) : items.length === 0 ? (
+                    <div className="mt-20 text-center text-slate-400 font-medium">No portfolio items added yet.</div>
+                ) : (
+                    <div className="mt-20 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+                        {items.map((item, i) => (
+                            <motion.div
+                                key={item.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                className="group cursor-pointer"
+                                onClick={() => setSelectedItem(item)}
+                            >
+                                <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-200 bg-slate-50">
+                                    <img
+                                        src={item.cover_image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800"}
+                                        alt={item.title}
+                                        className="h-full w-full object-cover opacity-60 transition-all duration-700 group-hover:scale-110 group-hover:rotate-1 group-hover:opacity-80"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
 
-                                <div className="absolute inset-0 flex flex-col justify-end p-8">
-                                    <div className="flex items-center justify-between gap-4 mb-4">
-                                        <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">
-                                            {item.category}
+                                    {item.badge && (
+                                        <div className="absolute top-6 left-6 z-10">
+                                            <span className="rounded-full bg-cyan-400 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg">
+                                                {item.badge}
+                                            </span>
                                         </div>
+                                    )}
+
+                                    <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-8 z-10 transition-transform duration-300 group-hover:translate-y-[-8px]">
+                                        <div className="mb-4">
+                                            <span className="rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white flex items-center gap-1.5 w-max">
+                                                <ImageIcon size={10} /> {item.category}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-white tracking-tight leading-tight">{item.title}</h3>
+                                        <p className="mt-4 text-xs font-bold uppercase tracking-widest text-cyan-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center gap-2">
+                                            View Gallery <ArrowRight size={14} />
+                                        </p>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-slate-950 tracking-tight">{item.title}</h3>
-                                    <p className="mt-4 text-sm leading-relaxed text-slate-600 line-clamp-2">
-                                        {item.desc}
-                                    </p>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
             </div>
+
+            {/* Gallery Modal */}
+            <AnimatePresence>
+                {selectedItem && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-xl p-4 sm:p-8"
+                    >
+                        <button
+                            onClick={() => setSelectedItem(null)}
+                            className="absolute top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-md border border-white/20"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[3rem] bg-slate-900 border border-white/10 shadow-2xl custom-scrollbar flex flex-col flex-nowrap" onClick={e => e.stopPropagation()}>
+                            <div className="p-8 md:p-12 border-b border-white/10 shrink-0">
+                                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
+                                    <ImageIcon size={12} /> {selectedItem.category}
+                                </div>
+                                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">{selectedItem.title}</h2>
+                                <p className="mt-6 text-slate-400 md:text-lg leading-relaxed max-w-3xl">
+                                    {selectedItem.description}
+                                </p>
+                            </div>
+
+                            <div className="p-8 md:p-12 bg-slate-950 flex-grow">
+                                {(!selectedItem.gallery_images || selectedItem.gallery_images.length === 0) ? (
+                                    <div className="rounded-[2.5rem] border border-white/10 border-dashed p-20 text-center text-slate-500">
+                                        No gallery images available for this project.
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-10 grid-cols-1">
+                                        {selectedItem.gallery_images.map((imgUrl, idx) => (
+                                            <div key={idx} className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl">
+                                                <img src={imgUrl} alt={`${selectedItem.title} screenshot ${idx + 1}`} className="w-full h-auto object-cover" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 }
@@ -1187,6 +1311,7 @@ export default function App() {
                                 <Services />
                                 <Portfolio />
                                 <PricingCards />
+                                <PosterPricing />
                                 <RequestForm />
                                 <Contact />
                                 <Footer />
@@ -1198,8 +1323,9 @@ export default function App() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 px-6 min-h-[80vh] flex items-center justify-center"
+                                className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden"
                             >
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)]" />
                                 <Auth
                                     defaultMode="login"
                                     onAuthSuccess={() => navigate('/account')}
@@ -1213,8 +1339,9 @@ export default function App() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="pt-32 pb-20 px-6 min-h-[80vh] flex items-center justify-center"
+                                className="pt-32 pb-20 px-6 min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden"
                             >
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)]" />
                                 <Auth
                                     defaultMode="register"
                                     onAuthSuccess={() => navigate('/account')}
