@@ -354,7 +354,7 @@ function TopNav({ session, onPortalClick }) {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onPortalClick}
-                        className="hidden items-center gap-2 rounded-full border border-white/30 bg-slate-100 px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-950 transition hover:bg-slate-200 md:inline-flex"
+                        className="hidden items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-slate-800 md:inline-flex"
                     >
                         {session ? <LayoutDashboard className="h-4 w-4" /> : <User className="h-4 w-4" />}
                         {session ? "Portal" : "Login / Register"}
@@ -364,7 +364,7 @@ function TopNav({ session, onPortalClick }) {
                         href={createWhatsAppLink("Hello, I want to enquire about LCX STUDIOS services.")}
                         target="_blank"
                         rel="noreferrer"
-                        className="hidden items-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-950 transition hover:bg-slate-200 md:inline-flex"
+                        className="hidden items-center gap-2 rounded-full bg-slate-900 border border-slate-700 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-slate-800 md:inline-flex"
                     >
                         <MessageCircle className="h-4 w-4" />
                         Connect
@@ -421,10 +421,10 @@ function Hero() {
     return (
         <section id="home" className="relative min-h-screen overflow-hidden pt-32 lg:pt-0 lg:flex lg:items-center">
             {/* Background Effects */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.15),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.15),transparent_40%)]" />
-                <div className="absolute inset-0 bg-slate-50" />
-                <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:100px_100px]" />
+            <div className="absolute inset-0 z-0 text-slate-950">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.08),transparent_50%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.1),transparent_40%)]" />
+                <div className="absolute inset-0 bg-white" />
+                <div className="absolute inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(15,23,42,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.1)_1px,transparent_1px)] [background-size:100px_100px]" />
 
                 {/* Animated Glows */}
                 <motion.div
@@ -534,7 +534,7 @@ function Hero() {
                     </div>
                 </motion.div>
             </div>
-        </section>
+        </section >
     );
 }
 
@@ -1053,31 +1053,31 @@ function SmartChatWidget() {
 
 function Footer() {
     return (
-        <footer className="bg-white py-20 border-t border-slate-100">
+        <footer className="bg-slate-950 py-20 border-t border-white/5">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-12">
                     <div className="text-center md:text-left">
                         <div className="flex items-center gap-4 justify-center md:justify-start">
-                            <div className="h-12 w-12 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden p-1">
+                            <div className="h-12 w-12 rounded-xl border border-white/10 bg-slate-900 overflow-hidden p-1">
                                 <img src="/logo.png" alt="LCX Logo" className="h-full w-full object-contain" />
                             </div>
-                            <div className="text-2xl font-black tracking-[0.2em] text-slate-950">LCX STUDIOS</div>
+                            <div className="text-2xl font-black tracking-[0.2em] text-white">LCX STUDIOS</div>
                         </div>
-                        <p className="mt-6 text-sm text-slate-500 max-w-sm leading-8">
+                        <p className="mt-6 text-sm text-slate-400 max-w-sm leading-8">
                             Premium technology and creative execution for the next generation of brands and businesses.
                         </p>
                     </div>
 
                     <div className="flex flex-wrap gap-8 justify-center">
                         {navItems.map((item) => (
-                            <a key={item.href} href={item.href} className="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-slate-950 transition-colors">
+                            <a key={item.href} href={item.href} className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
                                 {item.label}
                             </a>
                         ))}
                     </div>
                 </div>
 
-                <div className="mt-20 pt-10 border-t border-slate-100 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600">
+                <div className="mt-20 pt-10 border-t border-white/5 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">
                     © {new Date().getFullYear()} LCX STUDIOS. All rights reserved.
                 </div>
             </div>

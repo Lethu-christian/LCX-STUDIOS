@@ -52,10 +52,10 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-slate-50 border border-slate-200 shadow-2xl">
+        <div className="w-full max-w-md mx-auto relative p-8 rounded-3xl bg-white border border-slate-300 shadow-2xl">
             <button
                 onClick={onBack}
-                className="absolute top-6 left-6 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-950 transition-all"
+                className="absolute top-6 left-6 p-2 rounded-full bg-slate-50 hover:bg-slate-950 hover:text-white text-slate-500 transition-all"
             >
                 <ArrowLeft size={18} />
             </button>
@@ -70,23 +70,6 @@ const Auth = ({ defaultMode = 'login', onAuthSuccess, onBack }) => {
                 <p className="text-slate-600">
                     {isLogin ? 'Login to manage your business systems' : 'Create an account to get started'}
                 </p>
-            </div>
-
-            <div className="space-y-4 mb-8">
-                <button
-                    onClick={() => handleOAuth('google')}
-                    disabled={loading}
-                    className="w-full py-3 px-4 rounded-xl bg-white border border-slate-200 text-slate-950 font-semibold flex items-center justify-center gap-3 hover:bg-slate-50 transition-all disabled:opacity-50 shadow-sm"
-                >
-                    <Chrome size={20} className="text-blue-600" />
-                    Continue with Google
-                </button>
-
-                <div className="relative flex items-center py-2">
-                    <div className="flex-grow border-t border-slate-200"></div>
-                    <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-slate-500 font-bold">OR</span>
-                    <div className="flex-grow border-t border-slate-200"></div>
-                </div>
             </div>
 
             <form onSubmit={handleEmailAuth} className="space-y-4">

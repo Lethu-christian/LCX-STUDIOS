@@ -56,7 +56,7 @@ const Account = ({ session, onSignOut, onBack }) => {
                 >
                     {/* Left Column: Profile Card */}
                     <div className="md:col-span-1 space-y-6">
-                        <div className="p-8 rounded-3xl bg-slate-50/50 border border-slate-200 backdrop-blur-md text-center">
+                        <div className="p-8 rounded-3xl bg-slate-950 border border-white/10 text-center shadow-xl">
                             <div className="relative inline-block mb-6">
                                 {profile.avatar ? (
                                     <img
@@ -65,31 +65,30 @@ const Account = ({ session, onSignOut, onBack }) => {
                                         className="w-32 h-32 rounded-full border-4 border-blue-600/30 object-cover"
                                     />
                                 ) : (
-                                    <div className="w-32 h-32 rounded-full bg-blue-600/20 border-4 border-blue-600/30 flex items-center justify-center text-blue-400">
+                                    <div className="w-32 h-32 rounded-full bg-blue-500/10 border-4 border-blue-500/30 flex items-center justify-center text-blue-400">
                                         <User size={48} />
                                     </div>
                                 )}
-                                <div className="absolute bottom-0 right-0 p-2 rounded-full bg-blue-600 border-2 border-slate-900 text-slate-950">
+                                <div className="absolute bottom-0 right-0 p-2 rounded-full bg-blue-600 border-2 border-slate-950 text-white">
                                     <Shield size={16} />
                                 </div>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-slate-950 mb-2">{profile.name}</h2>
-                            <p className="text-slate-600 text-sm mb-6 flex items-center justify-center gap-2">
+                            <h2 className="text-2xl font-bold text-white mb-2">{profile.name}</h2>
+                            <p className="text-slate-400 text-sm mb-6 flex items-center justify-center gap-2">
                                 <Mail size={14} />
                                 {profile.email}
                             </p>
 
                             <button
                                 onClick={handleSignOut}
-                                className="w-full py-3 rounded-xl bg-slate-100 border border-slate-200 text-red-400 font-semibold flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
+                                className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-red-400 font-semibold flex items-center justify-center gap-2 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
                             >
                                 <LogOut size={18} />
                                 Log Out
                             </button>
                         </div>
-
-                        <div className="p-6 rounded-2xl bg-slate-50/30 border border-slate-100">
+                        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
                             <h3 className="text-slate-950 font-bold mb-4 flex items-center gap-2">
                                 <Settings size={18} className="text-blue-500" />
                                 Account Info
