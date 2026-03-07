@@ -125,10 +125,24 @@ export default function FinancialAnalyzer({ session }) {
             const { data, error } = await supabase.functions.invoke('generate-ai-summary', {
                 body: { userId: session.user.id }
             });
-            if (error) throw error;
+            if (error) {
+                // Supabase Edge Function errors often contain the body in error.context
+                let detail = '';
+                try {
+                    if (error.context && typeof error.context.text === 'function') {
+                        detail = await error.context.text();
+                    } else if (error.message) {
+                        detail = error.message;
+                    }
+                } catch (e) {
+                    detail = error.message || 'Unknown error';
+                }
+                throw new Error(detail || error.message || 'Edge Function Error');
+            }
             await fetchFinancialData();
         } catch (error) {
             const errorMsg = error.message || (typeof error === 'object' ? JSON.stringify(error) : String(error));
+            console.error('AI Generation Error Detail:', error);
             alert('AI Generation failed: ' + errorMsg);
         } finally {
             setGeneratingAI(false);

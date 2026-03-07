@@ -22,6 +22,9 @@ Deno.serve(async (req) => {
     if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
+        if (!GEMINI_API_KEY) {
+            return respond({ success: false, error: "GEMINI_API_KEY is not configured in Supabase secrets." }, 500);
+        }
         const { userId } = await req.json();
         if (!userId) return respond({ success: false, error: "Missing userId" }, 400);
 
@@ -39,10 +42,10 @@ Deno.serve(async (req) => {
             .eq("user_id", userId)
             .order("month_year", { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
         if (!txs || txs.length === 0) {
-            return respond({ success: false, error: "No transaction data found to analyze." }, 400);
+            return respond({ success: false, error: "No transaction data found to analyze. Please upload a statement first." }, 400);
         }
 
         // 2. Prepare Data for AI
@@ -54,7 +57,7 @@ Deno.serve(async (req) => {
             Health Score: ${analysis?.health_score || 0}%
             
             RECENT TRANSACTIONS (Last 100):
-            ${txs.map(t => `${t.date} | ${t.description} | R${t.amount} | ${t.direction} | ${t.category}`).join("\n")}
+            ${txs.length > 0 ? txs.map(t => `${t.date} | ${t.description} | R${t.amount} | ${t.direction} | ${t.category}`).join("\n") : "No transactions found."}
         `;
 
         // 3. Call Gemini AI
@@ -103,6 +106,10 @@ Deno.serve(async (req) => {
 
     } catch (err: any) {
         console.error("AI Generation Error:", err);
-        return respond({ success: false, error: err?.message || String(err) }, 500);
+        return respond({
+            success: false,
+            error: err?.message || String(err),
+            details: err?.stack || "No stack trace available"
+        }, 500);
     }
 });
