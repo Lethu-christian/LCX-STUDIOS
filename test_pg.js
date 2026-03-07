@@ -5,7 +5,7 @@ const { Client } = pg;
 
 const run = async () => {
     const client = new Client({
-        connectionString: 'postgresql://postgres:19652004199819481996@[2a05:d014:1c06:4d5f:49:8fbb:8c92:fd98]:5432/postgres',
+        connectionString: 'postgresql://postgres:19652004199819481996@db.rcwjksiubkuhmwxxupsp.supabase.co:5432/postgres',
         ssl: { rejectUnauthorized: false }
     });
 

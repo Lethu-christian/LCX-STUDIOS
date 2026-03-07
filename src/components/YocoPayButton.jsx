@@ -36,7 +36,12 @@ export default function YocoPayButton({ amountInCents, description, onSuccess, l
             const userId = session.user.id;
             const returnUrl = window.location.origin + window.location.pathname + '?yoco_return=1';
             const { data, error } = await supabase.functions.invoke('verify-yoco', {
-                body: { mode: 'create', amountInCents, successUrl: returnUrl }
+                body: {
+                    mode: 'create',
+                    amountInCents,
+                    successUrl: returnUrl,
+                    metadata: { description }
+                }
             });
 
             if (error) throw new Error(error.message || 'Failed to start payment.');

@@ -126,21 +126,21 @@ const serviceCards = [
 const portfolioItems = [
     {
         category: "Voting Platform",
-        title: "Black Barbie Ambassador Voting System",
+        title: "LCX Elite Voting System",
         desc: "A premium voting experience for pageantry audiences with contestant pages, live rankings, admin control, and conversion-focused purchase flows.",
         badge: "Featured SaaS",
         image: "https://images.unsplash.com/photo-1551288049-bbbda536639a?auto=format&fit=crop&q=80&w=800",
     },
     {
         category: "Internal Business System",
-        title: "BlackBarbiebyTK Internal System",
-        desc: "A custom business operations system inspired by real internal workflows like staff control, orders, finance tracking, and admin dashboards.",
+        title: "LCX Studio Internal Operations",
+        desc: "A custom business operations system with staff control, orders, finance tracking, and admin dashboards.",
         badge: "Business Systems",
         image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
     },
     {
         category: "Poster Design",
-        title: "Black Barbie Ambassador Posters",
+        title: "LCX Signature Pageant Posters",
         desc: "Bold, luxurious visual campaign work designed for pageant promotion, contestant highlights, and event visibility.",
         badge: "Creative Direction",
         image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800",
@@ -993,7 +993,7 @@ function AnalyzerCallout() {
                             </h2>
                             <p className="mt-6 text-lg font-medium text-slate-500 leading-relaxed">
                                 Deep financial extraction and AI-powered business insights.
-                                Upload statements and get 100% accurate health scores with our R20 priority reports.
+                                Upload statements and get 100% accurate health scores with our Free priority reports (Testing Mode).
                             </p>
 
                             <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -1001,7 +1001,7 @@ function AnalyzerCallout() {
                                     "Bank Statement Extraction",
                                     "Cash Flow Analysis",
                                     "Fraud & Risk Detection",
-                                    "R20 AI Business Reports"
+                                    "Free AI Business Reports"
                                 ].map((point) => (
                                     <div key={point} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-xs font-bold text-slate-700 shadow-sm">
                                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">

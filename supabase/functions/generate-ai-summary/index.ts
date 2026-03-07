@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
             .from("financial_ai_reports")
             .upsert({
                 user_id: userId,
-                report_summary: aiText,
+                report_content: aiText,
                 full_insights: aiData,
                 created_at: new Date().toISOString()
             })

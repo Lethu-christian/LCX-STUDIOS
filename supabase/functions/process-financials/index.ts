@@ -102,17 +102,43 @@ function parseCSV(text: string, userId: string, uploadId: string) {
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
-        const parts = line.split(",");
+        const parts = line.split(",").map(p => p.trim());
+
         // Expecting: Date, Description, Amount, Direction
-        if (parts.length >= 4) {
+        if (parts.length >= 3) {
+            const rawDate = parts[0];
+            const description = parts[1] || "No description";
+            const amount = parseFloat(parts[2].replace(/[^\d.-]/g, ''));
+            const direction = (parts[3] || "debit").toLowerCase() === "credit" ? "credit" : "debit";
+
+            if (isNaN(amount)) {
+                console.warn(`Invalid amount on line ${i}: ${parts[2]}`);
+                continue;
+            }
+
+            // Simple date validation/normalization
+            let formattedDate = rawDate;
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+                try {
+                    const d = new Date(rawDate);
+                    if (!isNaN(d.getTime())) {
+                        formattedDate = d.toISOString().split('T')[0];
+                    } else {
+                        formattedDate = new Date().toISOString().split('T')[0];
+                    }
+                } catch {
+                    formattedDate = new Date().toISOString().split('T')[0];
+                }
+            }
+
             results.push({
                 user_id: userId,
                 upload_id: uploadId,
-                date: parts[0],
-                description: parts[1],
-                amount: Math.abs(parseFloat(parts[2])),
-                direction: parts[3].toLowerCase() === "credit" ? "credit" : "debit",
-                category: classifyTransaction(parts[1])
+                date: formattedDate,
+                description: description,
+                amount: Math.abs(amount),
+                direction: direction,
+                category: classifyTransaction(description)
             });
         }
     }
@@ -120,6 +146,7 @@ function parseCSV(text: string, userId: string, uploadId: string) {
 }
 
 function classifyTransaction(desc: string) {
+    if (!desc) return "Other";
     const d = desc.toLowerCase();
     if (d.includes("salary") || d.includes("payroll")) return "Payroll";
     if (d.includes("rent") || d.includes("lease")) return "Rent";

@@ -56,13 +56,8 @@ Deno.serve(async (req) => {
                 currency: "ZAR",
                 successUrl,
             };
-
-            if (typeof cancelUrl === "string" && cancelUrl.startsWith("http")) {
-                payload.cancelUrl = cancelUrl;
-            }
-            if (metadata && typeof metadata === "object") {
-                payload.metadata = metadata;
-            }
+            if (cancelUrl) payload.cancelUrl = cancelUrl;
+            if (metadata) payload.metadata = metadata;
 
             const res = await fetch(`${YOCO_API_BASE}/checkouts`, {
                 method: "POST",

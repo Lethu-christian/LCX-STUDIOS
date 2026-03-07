@@ -330,7 +330,7 @@ export default function FinancialAnalyzer({ session }) {
                                                 <Sparkles size={14} /> AI Analysis Complete
                                             </div>
                                             <div className="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed whitespace-pre-wrap">
-                                                {aiReport.report_summary}
+                                                {aiReport.report_content || aiReport.report_summary}
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-800">
                                                 <div>
@@ -349,14 +349,21 @@ export default function FinancialAnalyzer({ session }) {
                                             <p className="text-xs font-black uppercase tracking-widest text-blue-400">AI is architecting your report...</p>
                                         </div>
                                     ) : (
-                                        <YocoPayButton
-                                            amountInCents={2000}
-                                            description="AI Financial Performance Summary"
-                                            label="Unlock AI Summary (R20)"
-                                            onSuccess={handleAISummaryGenerated}
-                                        />
+                                        <button
+                                            onClick={handleAISummaryGenerated}
+                                            disabled={generatingAI}
+                                            className="w-full relative flex items-center justify-center gap-3 rounded-full bg-blue-600 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-500 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg group overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                                            {generatingAI ? (
+                                                <RefreshCcw className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <Zap className="h-5 w-5 fill-current" />
+                                            )}
+                                            Generate Free AI Summary (Testing)
+                                        </button>
                                     )}
-                                    <p className="mt-6 text-[10px] text-slate-600 font-bold uppercase tracking-widest">Single report generation • Secure transaction via Yoco</p>
+                                    <p className="mt-6 text-[10px] text-slate-600 font-bold uppercase tracking-widest">Single report generation • Free for testing (Dev Mode)</p>
                                 </div>
                             </div>
                         </motion.div>
