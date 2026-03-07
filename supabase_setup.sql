@@ -242,6 +242,7 @@ CREATE TABLE IF NOT EXISTS financial_ai_reports (
     user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     month_year text NOT NULL,
     report_content text NOT NULL,
+    full_insights jsonb,
     purchase_ref text REFERENCES purchases(reference),
     created_at timestamptz DEFAULT now() NOT NULL
 );
