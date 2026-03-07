@@ -72,19 +72,28 @@ export default function FinancialAnalyzer({ session }) {
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || !session) return;
 
         setProcessing(true);
-        try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+        setStatus('Uploading...');
 
-            const { data: uploadData, error: uploadErr } = await supabase.storage
+        try {
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const allowedExts = ['csv', 'pdf', 'png', 'jpg', 'jpeg'];
+
+            if (!allowedExts.includes(fileExt)) {
+                alert('Please upload a CSV, PDF, or Image file');
+                return;
+            }
+
+            const fileName = `${session.user.id}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+            const { data, error: uploadErr } = await supabase.storage
                 .from('financial-docs')
                 .upload(fileName, file);
 
             if (uploadErr) throw uploadErr;
 
+            // Save record
             const { data: dbData, error: dbErr } = await supabase
                 .from('financial_uploads')
                 .insert({
@@ -109,9 +118,11 @@ export default function FinancialAnalyzer({ session }) {
             await fetchFinancialData();
             setActiveTab('dashboard');
         } catch (error) {
+            console.error('Upload Error:', error);
             alert('Upload failed: ' + error.message);
         } finally {
             setProcessing(false);
+            setStatus('Ready');
         }
     };
 
@@ -296,7 +307,7 @@ export default function FinancialAnalyzer({ session }) {
                                 <div className="border-2 border-dashed border-slate-800 rounded-[2.5rem] p-12 hover:border-blue-500/50 transition-all group relative cursor-pointer">
                                     <input
                                         type="file"
-                                        accept=".pdf,.csv,.xlsx"
+                                        accept=".pdf,.csv,.xlsx,.png,.jpg,.jpeg"
                                         onChange={handleFileUpload}
                                         disabled={processing}
                                         className="absolute inset-0 opacity-0 cursor-pointer z-10"

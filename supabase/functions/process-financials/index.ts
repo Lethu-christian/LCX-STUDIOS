@@ -55,19 +55,10 @@ Deno.serve(async (req) => {
         if (upload.file_type === "csv") {
             const text = await fileData.text();
             transactions = parseCSV(text, upload.user_id, upload.id);
-        } else if (upload.file_type === "pdf") {
-            // Implementation for PDF parsing requires a library like pdf-parse
-            // For now, let's assume we use a mock or a basic regex for simple PDFs
-            // In a real scenario, we'd use: import { PDFDocument } from 'https://cdn.skypack.dev/pdf-lib';
-            transactions = [{
-                user_id: upload.user_id,
-                upload_id: upload.id,
-                date: new Date().toISOString().split('T')[0],
-                description: "Sample PDF Transaction",
-                amount: 1000,
-                direction: "credit",
-                category: "Income"
-            }];
+        } else if (upload.file_type === "pdf" || upload.file_type === "image" || upload.file_type === "png" || upload.file_type === "jpg" || upload.file_type === "jpeg") {
+            const mimeType = upload.file_type === "pdf" ? "application/pdf" : `image/${upload.file_type.replace('jpg', 'jpeg')}`;
+            const bytes = await fileData.arrayBuffer();
+            transactions = await extractWithAI(bytes, mimeType, upload.user_id, upload.id);
         }
 
         if (transactions.length === 0) {
@@ -95,6 +86,61 @@ Deno.serve(async (req) => {
         return respond({ success: false, error: err?.message || String(err) }, 500);
     }
 });
+
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+
+async function extractWithAI(bytes: ArrayBuffer, mimeType: string, userId: string, uploadId: string) {
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
+
+    const base64Data = btoa(String.fromCharCode(...new Uint8Array(bytes)));
+
+    const prompt = `Extract all financial transactions from this document. 
+    Return a valid JSON array of objects with these keys: 
+    - date (YYYY-MM-DD)
+    - description
+    - amount (numeric positive)
+    - direction ('credit' or 'debit')
+    - category (one of: 'Payroll', 'Rent', 'Transport', 'Food & Dining', 'Utilities', 'Other')
+
+    Return ONLY the raw JSON array. No markdown, no filler.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: mimeType, data: base64Data } }
+                ]
+            }],
+            generationConfig: { temperature: 0.1, response_mime_type: "application/json" }
+        })
+    });
+
+    if (!response.ok) {
+        const err = await response.text();
+        console.error("Gemini Error:", err);
+        throw new Error("AI Extraction failed");
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return [];
+
+    try {
+        const rawJson = JSON.parse(text);
+        return rawJson.map((tx: any) => ({
+            ...tx,
+            user_id: userId,
+            upload_id: uploadId,
+            amount: Math.abs(parseFloat(tx.amount) || 0)
+        }));
+    } catch (e) {
+        console.error("JSON Parse Error:", e, text);
+        return [];
+    }
+}
 
 function parseCSV(text: string, userId: string, uploadId: string) {
     const lines = text.split("\n");

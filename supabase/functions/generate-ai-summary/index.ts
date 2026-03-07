@@ -88,11 +88,14 @@ Deno.serve(async (req) => {
 
         const aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "No insights generated.";
 
+        const currentMonthYear = analysis?.month_year || new Date().toISOString().slice(0, 7);
+
         // 4. Save AI Report
         const { data: report, error: reportErr } = await supabase
             .from("financial_ai_reports")
             .upsert({
                 user_id: userId,
+                month_year: currentMonthYear,
                 report_content: aiText,
                 full_insights: aiData,
                 created_at: new Date().toISOString()
