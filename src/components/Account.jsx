@@ -75,7 +75,7 @@ const Account = ({ session, onSignOut, onBack }) => {
     };
 
     const handleWhatsApp = (purchase) => {
-        const msg = `Hello LCX STUDIOS! 🎉 I've made a payment of R${Number(purchase.amount).toLocaleString()} for: ${purchase.description}. Please respond to confirm my order and next steps. Ref: ${purchase.reference?.substring(0, 20)}`;
+        const msg = `Hello LCX STUDIOS! 🎉 I've made a payment of R${Number(purchase.amount).toLocaleString()} for this type of order: ${purchase.description}. Please respond to confirm my next steps. Ref: ${purchase.reference?.substring(0, 20)}`;
         window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
@@ -130,6 +130,13 @@ const Account = ({ session, onSignOut, onBack }) => {
                                     Admin Dashboard <ChevronRight size={16} />
                                 </button>
                             )}
+
+                            <button
+                                onClick={() => window.location.href = '/analyzer'}
+                                className="w-full mb-3 py-3 rounded-xl bg-slate-800 text-blue-400 font-bold text-sm border border-blue-500/20 hover:bg-slate-700 transition-all flex items-center justify-center gap-2"
+                            >
+                                <RefreshCcw size={16} /> Access Analyzer
+                            </button>
 
                             <button
                                 onClick={handleSignOut}

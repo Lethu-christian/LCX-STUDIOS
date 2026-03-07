@@ -140,6 +140,12 @@ export default function FinancialAnalyzer({ session }) {
                             <Activity className="text-blue-500" /> AI Business Financial Analyzer
                         </h1>
                         <p className="text-slate-400 mt-2 font-medium">Structure, categorize, and analyze your business cash flow with AI.</p>
+                        <button
+                            onClick={() => window.location.href = '#home'}
+                            className="mt-4 inline-flex items-center gap-2 text-blue-500 hover:text-blue-400 text-xs font-black uppercase tracking-widest transition-all"
+                        >
+                            <RefreshCcw size={12} className="rotate-180" /> Return to Portal
+                        </button>
                     </div>
                     <div className="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-800 backdrop-blur-3xl">
                         {['dashboard', 'upload', 'history', 'ai_report'].map(tab => (
