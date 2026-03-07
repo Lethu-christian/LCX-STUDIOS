@@ -4,7 +4,7 @@ import {
     TrendingUp, TrendingDown, Wallet, ShieldCheck,
     AlertTriangle, FileText, Upload, RefreshCcw,
     PieChart, DollarSign, Activity, CheckCircle2,
-    Lock, Sparkles, MessageSquare, Download
+    Lock, Sparkles, MessageSquare, Download, Zap
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import YocoPayButton from './YocoPayButton';
