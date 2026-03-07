@@ -36,7 +36,7 @@ export default function FinancialAnalyzer({ session }) {
                 .eq('user_id', session.user.id)
                 .order('month_year', { ascending: false })
                 .limit(1)
-                .single();
+                .maybeSingle();
 
             const { data: txsData } = await supabase
                 .from('financial_transactions')
@@ -57,7 +57,7 @@ export default function FinancialAnalyzer({ session }) {
                 .eq('user_id', session.user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
-                .single();
+                .maybeSingle();
 
             if (analysisData) setAnalysis(analysisData);
             if (txsData) setTransactions(txsData);
