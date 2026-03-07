@@ -5,7 +5,7 @@ import {
     Users, Globe, Shield, Search, MoreVertical, ArrowLeft,
     LayoutDashboard, ExternalLink, Image as ImageIcon, Plus, Edit2, Trash2, X,
     Upload, Code2, ShieldCheck, Palette, Settings, CheckCircle2, AlertCircle,
-    WalletCards, RefreshCcw, FileText
+    WalletCards, RefreshCcw, FileText, Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -99,6 +99,7 @@ export default function Admin() {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('overview');
     const [purchases, setPurchases] = useState([]);
+    const [financialUploads, setFinancialUploads] = useState([]);
     const [toast, setToast] = useState(null);
     const navigate = useNavigate();
 
@@ -163,6 +164,14 @@ export default function Admin() {
                 console.warn('Purchases fetch failed:', purchasesErr?.message || purchasesData?.error);
                 setPurchases([]);
             }
+
+            // Fetch financial uploads (Admin view — all users)
+            const { data: uploadsData } = await supabase
+                .from('financial_uploads')
+                .select('*, profiles(full_name, username)')
+                .order('created_at', { ascending: false });
+            setFinancialUploads(uploadsData || []);
+
         } catch (error) {
             console.error('Error fetching admin data:', error);
         } finally {
@@ -305,6 +314,7 @@ export default function Admin() {
         { id: 'portfolio', label: 'Portfolio' },
         { id: 'services', label: 'Services' },
         { id: 'purchases', label: `Purchases ${purchases.length > 0 ? `(${purchases.length})` : ''}` },
+        { id: 'monitoring', label: `Monitoring ${financialUploads.length > 0 ? `(${financialUploads.length})` : ''}` },
     ];
 
     return (
@@ -624,6 +634,71 @@ export default function Admin() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="font-mono text-xs text-slate-500">{purchase.reference?.substring(0, 20)}…</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ---- MONITORING TAB ---- */}
+                {activeTab === 'monitoring' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                                    <Activity className="text-blue-500" /> Financial Monitoring
+                                </h2>
+                                <p className="text-slate-400 text-sm mt-1">Real-time status of all financial document uploads and AI processing.</p>
+                            </div>
+                            <button onClick={fetchData} className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all font-bold text-sm">
+                                <RefreshCcw size={16} /> Refresh
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <StatCard icon={<Upload className="text-blue-500" />} label="Total Uploads" value={financialUploads.length} />
+                            <StatCard icon={<CheckCircle2 className="text-green-500" />} label="Completed" value={financialUploads.filter(u => u.status === 'completed').length} />
+                            <StatCard icon={<AlertCircle className="text-amber-500" />} label="Processing/Pending" value={financialUploads.filter(u => u.status !== 'completed' && u.status !== 'error').length} />
+                        </div>
+
+                        <div className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table className="w-full text-left min-w-[700px]">
+                                <thead className="bg-[#020617] border-b border-slate-700">
+                                    <tr>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Date</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Client</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Filename</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-center">Status</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800">
+                                    {financialUploads.length === 0 ? (
+                                        <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">No financial uploads found.</td></tr>
+                                    ) : financialUploads.map(upload => (
+                                        <tr key={upload.id} className="hover:bg-slate-800/40 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-slate-400">
+                                                {new Date(upload.created_at).toLocaleDateString('en-ZA')}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-white text-sm">{upload.profiles?.full_name || 'Guest'}</div>
+                                                <div className="text-[10px] text-slate-500">@{upload.profiles?.username || 'unknown'}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-semibold text-white max-w-[200px] truncate">{upload.filename}</td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                                    upload.status === 'completed' ? "bg-green-900/40 text-green-400 border border-green-500/20" :
+                                                        upload.status === 'error' ? "bg-red-900/40 text-red-400 border border-red-500/20" :
+                                                            "bg-blue-900/40 text-blue-400 border border-blue-500/20"
+                                                )}>
+                                                    {upload.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-2 py-1 bg-slate-800 rounded border border-slate-700">{upload.file_type}</span>
                                             </td>
                                         </tr>
                                     ))}

@@ -5,7 +5,9 @@ import { LCX_LOGO_B64 } from "./assets/logo-b64";
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
 import Account from "./components/Account";
+import FinancialAnalyzer from './components/FinancialAnalyzer';
 import Admin from "./components/Admin";
+import YocoPayButton from "./components/YocoPayButton";
 import {
     ArrowRight,
     BadgeCheck,
@@ -32,6 +34,7 @@ import {
     Workflow,
     X,
     Zap,
+    Activity, // Added Activity icon for FinancialAnalyzer
 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "27678846390";
@@ -118,6 +121,20 @@ const serviceCards = [
         ],
         whatsapp: "Hello, I want logo design services.",
     },
+    {
+        icon: Activity,
+        title: "AI Financial Analyzer",
+        desc: "Deep financial extraction and AI-powered business insights. Upload statements and get 100% accurate health scores.",
+        badge: "New Service",
+        points: [
+            "Bank Statement Extraction",
+            "Cash Flow Analysis",
+            "Fraud & Risk Detection",
+            "R20 AI Business Reports"
+        ],
+        whatsapp: "Hello, I want to use the AI Financial Analyzer.",
+        link: "/analyzer"
+    }
 ];
 
 const portfolioItems = [
@@ -281,175 +298,6 @@ function cn(...classes) {
 
 function createWhatsAppLink(message) {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-}
-
-// ---------- YOCO PAY BUTTON COMPONENT (new redirect-based Checkout API) ----------
-function YocoPayButton({ amountInCents, description, onSuccess, label, onLoginRequired }) {
-    const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState('idle');
-    const [isLoggedIn, setIsLoggedIn] = useState(null);
-    const [successData, setSuccessData] = useState(null); // set after payment verified
-    const amountRand = `R${(amountInCents / 100).toFixed(0)}`;
-    const WHATSAPP_NUMBER = '27678846390';
-
-    // Check session + auto-verify on return from Yoco
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setIsLoggedIn(!!session);
-            const params = new URLSearchParams(window.location.search);
-            const isReturning = params.get('yoco_return') === '1';
-            const saved = JSON.parse(localStorage.getItem('pendingYocoPurchase') || '{}');
-            if (isReturning && saved.checkoutId && saved.description === description) {
-                verifyPayment(saved.checkoutId, saved.description, saved.userId);
-            }
-        });
-    }, []);
-
-    const handlePay = async () => {
-        // Re-check session at click time — block if not logged in
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            if (onLoginRequired) onLoginRequired();
-            else alert('Please log in or register to make a purchase.');
-            return;
-        }
-        setLoading(true);
-        setStatus('initializing');
-        try {
-            const userId = session.user.id;
-
-            const returnUrl = window.location.origin + window.location.pathname + '?yoco_return=1';
-            const { data, error } = await supabase.functions.invoke('verify-yoco', {
-                body: { mode: 'create', amountInCents, successUrl: returnUrl }
-            });
-
-            if (error) throw new Error(error.message || 'Failed to start payment.');
-            if (!data?.success || !data?.redirectUrl) {
-                throw new Error(data?.error || 'Could not initialize payment.');
-            }
-
-            // Save pending purchase info so we can verify on return
-            localStorage.setItem('pendingYocoPurchase', JSON.stringify({
-                checkoutId: data.checkoutId,
-                description,
-                amountInCents,
-                userId,
-            }));
-
-            window.location.href = data.redirectUrl;
-
-        } catch (err) {
-            console.error('Yoco create error:', err);
-            alert('Payment error: ' + err.message);
-            setLoading(false);
-            setStatus('idle');
-        }
-    };
-
-    const verifyPayment = async (checkoutId, desc, userId) => {
-        setStatus('verifying');
-        setLoading(true);
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-        try {
-            const { data, error } = await supabase.functions.invoke('verify-yoco', {
-                body: { mode: 'verify', checkoutId, description: desc, userId }
-            });
-            localStorage.removeItem('pendingYocoPurchase');
-            setLoading(false);
-            setStatus('idle');
-            if (error || !data?.success) {
-                alert('Payment verification failed: ' + (data?.error || error?.message || 'Unknown error'));
-            } else {
-                // Set success state — renders the WhatsApp CTA card (avoids popup block)
-                setSuccessData({ desc, amount: amountRand });
-                if (onSuccess) onSuccess();
-            }
-        } catch (err) {
-            console.error('Verify error:', err);
-            alert('Verification error: ' + err.message);
-            setLoading(false);
-            setStatus('idle');
-        }
-    };
-
-    // --- PAYMENT SUCCESS: Show WhatsApp CTA (no popup needed) ---
-    if (successData) {
-        const waMsg = `Hello LCX STUDIOS! 🎉 I've just made a payment of ${successData.amount} for: ${successData.desc}. Please respond to confirm my order and next steps. Thank you!`;
-        const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
-        return (
-            <div className="w-full rounded-3xl bg-green-950/40 border border-green-500/30 p-6 text-center space-y-4">
-                <div className="flex items-center justify-center gap-2 text-green-400">
-                    <CheckCircle2 className="h-7 w-7" />
-                    <span className="text-lg font-black">Payment Successful!</span>
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed">
-                    You paid <strong className="text-white">{successData.amount}</strong> for <strong className="text-white">{successData.desc}</strong>.
-                </p>
-                <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 w-full rounded-full bg-green-600 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-green-500 transition-all active:scale-95 shadow-lg"
-                >
-                    <MessageCircle className="h-5 w-5" />
-                    Chat on WhatsApp — Confirm Order
-                </a>
-                <p className="text-[10px] text-slate-500">Tap the button above to open WhatsApp and confirm your order details.</p>
-            </div>
-        );
-    }
-
-    // --- NOT LOGGED IN: Show login gate ---
-    if (isLoggedIn === false) {
-        return (
-            <div className="w-full space-y-3">
-                <div className="flex items-center gap-3 mb-1">
-                    <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>
-                </div>
-                <button
-                    onClick={() => onLoginRequired ? onLoginRequired() : alert('Please log in to purchase.')}
-                    className="w-full flex items-center justify-center gap-3 rounded-full bg-blue-600 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-500 hover:shadow-xl active:scale-95 shadow-lg"
-                >
-                    <User className="h-5 w-5" />
-                    Login to Purchase
-                </button>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
-                    <ShieldCheck className="h-3 w-3 text-green-500" />
-                    Login or register — it's free
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="w-full space-y-3">
-            <div className="flex items-center gap-3 mb-1">
-                <img src="/logo.png" alt="LCX Studios" className="h-8 w-8 object-contain rounded-lg" />
-                <span className="text-xs font-black uppercase tracking-widest text-slate-700">LCX STUDIOS</span>
-            </div>
-            <button
-                onClick={handlePay}
-                disabled={loading || isLoggedIn === null}
-                className="w-full flex items-center justify-center gap-3 rounded-full bg-slate-950 px-8 py-5 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-600/20 active:scale-95 disabled:opacity-70 shadow-lg"
-            >
-                {loading ? (
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                ) : <WalletCards className="h-5 w-5" />}
-                {status === 'initializing' ? 'Initializing...' :
-                    status === 'verifying' ? 'Verifying payment...' :
-                        label || `Pay R${(amountInCents / 100).toFixed(0)}`}
-            </button>
-            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
-                <ShieldCheck className="h-3 w-3 text-green-500" />
-                Secured by Yoco Gateway
-            </div>
-        </div>
-    );
 }
 
 
@@ -788,6 +636,7 @@ function Services() {
                     points: s.points || [],
                     whatsapp: s.whatsapp_msg || `Hello, I want ${s.title}.`,
                     cover_image: s.cover_image || null,
+                    link: s.link || null,
                 })));
             }
         };
@@ -827,14 +676,23 @@ function Services() {
                                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20">
                                             {IconComp && <IconComp className="h-8 w-8" />}
                                         </div>
-                                        <a
-                                            href={createWhatsAppLink(service.whatsapp)}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
-                                        >
-                                            Inquire <ChevronRight className="ml-2 h-4 w-4" />
-                                        </a>
+                                        {service.link ? (
+                                            <button
+                                                onClick={() => navigate(service.link)}
+                                                className="rounded-full border border-slate-200/50 bg-blue-600 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 active:scale-95 shadow-sm inline-flex items-center justify-center gap-2"
+                                            >
+                                                Open Dashboard <ArrowRight className="h-4 w-4" />
+                                            </button>
+                                        ) : (
+                                            <a
+                                                href={createWhatsAppLink(service.whatsapp)}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="rounded-full border border-slate-200/50 bg-white/40 backdrop-blur-md px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-950 hover:text-white active:scale-95 shadow-sm inline-flex items-center justify-center"
+                                            >
+                                                Enquire Now
+                                            </a>
+                                        )}
                                     </div>
 
                                     <h3 className="mt-10 text-3xl font-black text-slate-950 tracking-tighter">{service.title}</h3>
@@ -1506,7 +1364,15 @@ export default function App() {
     };
 
     if (location.pathname === "/admin") return <AdminPage />;
-
+    if (location.pathname === "/analyzer") {
+        return (
+            <div className="min-h-screen bg-[#020617]">
+                <TopNav session={session} onPortalClick={handlePortalClick} />
+                <FinancialAnalyzer session={session} />
+                <Footer />
+            </div>
+        );
+    }
     return (
         <div className="min-h-screen bg-white">
             <TopNav session={session} onPortalClick={handlePortalClick} />
