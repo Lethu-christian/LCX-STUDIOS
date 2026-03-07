@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, MessageCircle, ShieldCheck, User, Zap } from 'lucide-react';
-import { supabase } from '../supabase';
+import { supabase } from '../lib/supabase';
 
 const WHATSAPP_NUMBER = '27678846390';
 
@@ -87,7 +87,7 @@ export default function YocoPayButton({ amountInCents, description, onSuccess, l
     };
 
     if (successData) {
-        const waMsg = `Hello LCX STUDIOS! 🎉 I've just made a payment of ${successData.amount} for: ${successData.desc}. Please respond to confirm my order and next steps. Thank you!`;
+        const waMsg = `Hello LCX STUDIOS! 🎉 I've made a payment of ${successData.amount} for this type of order: ${successData.desc}. Please respond to confirm my next steps. Thank you!`;
         const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
         return (
             <div className="w-full rounded-3xl bg-green-950/40 border border-green-500/30 p-6 text-center space-y-4">
@@ -98,15 +98,25 @@ export default function YocoPayButton({ amountInCents, description, onSuccess, l
                 <p className="text-sm text-slate-300 leading-relaxed">
                     You paid <strong className="text-white">{successData.amount}</strong> for <strong className="text-white">{successData.desc}</strong>.
                 </p>
-                <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 w-full rounded-full bg-green-600 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-green-500 transition-all active:scale-95 shadow-lg"
-                >
-                    <MessageCircle className="h-5 w-5" />
-                    Chat on WhatsApp — Confirm Order
-                </a>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-3 w-full rounded-full bg-green-600 py-4 text-[10px] font-black uppercase tracking-widest text-white hover:bg-green-500 transition-all active:scale-95 shadow-lg"
+                    >
+                        <MessageCircle className="h-5 w-5" />
+                        WhatsApp
+                    </a>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="flex items-center justify-center gap-3 w-full rounded-full bg-blue-600 py-4 text-[10px] font-black uppercase tracking-widest text-white hover:bg-blue-500 transition-all active:scale-95 shadow-lg"
+                    >
+                        <Zap className="h-5 w-5 fill-current" />
+                        Use System
+                    </button>
+                </div>
             </div>
         );
     }
