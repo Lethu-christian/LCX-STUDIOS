@@ -116,6 +116,10 @@ export default function FinancialAnalyzer({ session }) {
     };
 
     const handleAISummaryGenerated = async () => {
+        if (!session) {
+            alert('Please log in to generate an AI summary.');
+            return;
+        }
         setGeneratingAI(true);
         try {
             const { data, error } = await supabase.functions.invoke('generate-ai-summary', {
