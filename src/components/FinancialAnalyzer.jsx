@@ -128,7 +128,8 @@ export default function FinancialAnalyzer({ session }) {
             if (error) throw error;
             await fetchFinancialData();
         } catch (error) {
-            alert('AI Generation failed: ' + error.message);
+            const errorMsg = error.message || (typeof error === 'object' ? JSON.stringify(error) : String(error));
+            alert('AI Generation failed: ' + errorMsg);
         } finally {
             setGeneratingAI(false);
         }
