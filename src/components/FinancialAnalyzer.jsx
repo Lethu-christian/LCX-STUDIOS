@@ -75,7 +75,6 @@ export default function FinancialAnalyzer({ session }) {
         if (!file || !session) return;
 
         setProcessing(true);
-        setStatus('Uploading...');
 
         try {
             const fileExt = file.name.split('.').pop().toLowerCase();
@@ -122,7 +121,6 @@ export default function FinancialAnalyzer({ session }) {
             alert('Upload failed: ' + error.message);
         } finally {
             setProcessing(false);
-            setStatus('Ready');
         }
     };
 
