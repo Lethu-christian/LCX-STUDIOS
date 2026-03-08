@@ -112,7 +112,20 @@ export default function FinancialAnalyzer({ session }) {
                 body: { uploadId: dbData.id }
             });
 
-            if (processErr) throw processErr;
+            if (processErr) {
+                console.error('Edge Function Error:', processErr);
+                let detail = '';
+                try {
+                    if (processErr.context && typeof processErr.context.text === 'function') {
+                        detail = await processErr.context.text();
+                    } else if (processErr.message) {
+                        detail = processErr.message;
+                    }
+                } catch (e) {
+                    detail = processErr.message || 'Unknown error';
+                }
+                throw new Error(detail || processErr.message || 'Edge Function Error');
+            }
 
             await fetchFinancialData();
             setActiveTab('dashboard');

@@ -52,13 +52,19 @@ Deno.serve(async (req) => {
         // 3. Parse file based on type
         let transactions: any[] = [];
 
-        if (upload.file_type === "csv") {
-            const text = await fileData.text();
-            transactions = parseCSV(text, upload.user_id, upload.id);
-        } else if (upload.file_type === "pdf" || upload.file_type === "image" || upload.file_type === "png" || upload.file_type === "jpg" || upload.file_type === "jpeg") {
-            const mimeType = upload.file_type === "pdf" ? "application/pdf" : `image/${upload.file_type.replace('jpg', 'jpeg')}`;
-            const bytes = await fileData.arrayBuffer();
-            transactions = await extractWithAI(bytes, mimeType, upload.user_id, upload.id);
+        try {
+            if (upload.file_type === "csv") {
+                const text = await fileData.text();
+                transactions = parseCSV(text, upload.user_id, upload.id);
+            } else if (upload.file_type === "pdf" || upload.file_type === "image" || upload.file_type === "png" || upload.file_type === "jpg" || upload.file_type === "jpeg") {
+                const mimeType = upload.file_type === "pdf" ? "application/pdf" : `image/${upload.file_type.replace('jpg', 'jpeg')}`;
+                const bytes = await fileData.arrayBuffer();
+                transactions = await extractWithAI(bytes, mimeType, upload.user_id, upload.id);
+            }
+        } catch (e: any) {
+            console.error("Extraction error:", e);
+            await supabase.from("financial_uploads").update({ status: "error", error_message: "AI extraction failed: " + e.message }).eq("id", uploadId);
+            return respond({ success: false, error: e.message }, 500);
         }
 
         if (transactions.length === 0) {
@@ -90,9 +96,13 @@ Deno.serve(async (req) => {
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 
 async function extractWithAI(bytes: ArrayBuffer, mimeType: string, userId: string, uploadId: string) {
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
-
-    const base64Data = btoa(String.fromCharCode(...new Uint8Array(bytes)));
+    const bytesArr = new Uint8Array(bytes);
+    let binary = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < bytesArr.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytesArr.subarray(i, i + chunkSize) as any);
+    }
+    const base64Data = btoa(binary);
 
     const prompt = `Extract all financial transactions from this document. 
     Return a valid JSON array of objects with these keys: 
@@ -104,7 +114,7 @@ async function extractWithAI(bytes: ArrayBuffer, mimeType: string, userId: strin
 
     Return ONLY the raw JSON array. No markdown, no filler.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

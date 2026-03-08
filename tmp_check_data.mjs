@@ -8,12 +8,16 @@ const supabase = createClient(
 async function check() {
     const { data: txs, error: txError } = await supabase.from('financial_transactions').select('id').limit(1);
     const { data: analysis, error: anError } = await supabase.from('financial_analysis').select('id').limit(1);
-    const { data: uploads, error: upError } = await supabase.from('financial_uploads').select('id, status').limit(5);
+    const { data: uploads, error: upError } = await supabase
+        .from('financial_uploads')
+        .select('id, status, error_message, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
     console.log('--- DATA CHECK ---');
     console.log('Transactions:', txs?.length || 0, txError?.message || '');
     console.log('Analysis:', analysis?.length || 0, anError?.message || '');
-    console.log('Uploads:', uploads || [], upError?.message || '');
+    console.log('Uploads:', JSON.stringify(uploads, null, 2), upError?.message || '');
 }
 
 check();
