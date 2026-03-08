@@ -29,3 +29,4 @@ dist-ssr
 convert_logo.ps1
 generate_b64.ps1
 logo_base64.txt
+.env
