@@ -225,6 +225,43 @@ const votingPackages = [
     },
 ];
 
+const businessPackages = [
+    {
+        name: "Internal Operations System",
+        price: "R25,000",
+        support: "14 days technical support after delivery",
+        whatsapp: "Hello, I’m interested in your Internal Operations System package.",
+        featured: false,
+        features: [
+            "Secure employee login portal",
+            "Payment verification system (search customer name & amount)",
+            "Bank statement PDF upload and payment tracking",
+            "Employee dashboard",
+            "Customer payment history view",
+            "Basic reporting dashboard",
+            "Admin panel for managing employees",
+            "Secure cloud database storage",
+            "Modern responsive interface"
+        ],
+    },
+    {
+        name: "Full Internal Business Management System",
+        price: "R55,000",
+        support: "30 days technical support + Staff training",
+        whatsapp: "Hello, I’m interested in the Full Internal Business Management System package.",
+        featured: true,
+        features: [
+            "Secure employee portal & work activity dashboard",
+            "HR Management (Leave & Sick note uploads, attendance, records)",
+            "Payroll Management (Payslip generation, salary records)",
+            "Financial Verification (Upload bank statements, payment extraction)",
+            "Admin Dashboard (Activity logs, analytics, reporting)",
+            "Role permissions (Admin / HR / Staff) & secure storage",
+            "Data Export (Excel / CSV) and Backup tools"
+        ],
+    },
+];
+
 const rentalPackages = [
     {
         name: "1 Month Rental",
@@ -750,7 +787,71 @@ function PricingCards() {
 
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
 
-                {/* ---- ACQUISITION TIER ---- */}
+                {/* ---- INTERNAL BUSINESS SYSTEMS TIER ---- */}
+                <SectionHeading
+                    eyebrow="Business Ops"
+                    title="Internal System Packages"
+                    description="Digitize your operations, HR, finance, and management under one integrated dashboard."
+                    center
+                />
+
+                <div className="mt-20 mb-40 grid gap-10 lg:grid-cols-2">
+                    {businessPackages.map((pkg, i) => {
+                        const amountString = pkg.price.replace(/[^0-9]/g, '');
+                        // If ranges are provided, parsing simply reads the first number.
+                        // "R25,000 – R35,000" -> amountString -> 25000
+                        const amountInCents = parseInt(amountString, 10) * 100;
+                        const waMsg = `Hello LCX STUDIOS. I have just made a payment of ${pkg.price} for the ${pkg.name}. Please get in touch to finalize.`;
+                        return (
+                            <motion.div
+                                key={pkg.name}
+                                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, ease: luxuryEase }}
+                                className={cn(
+                                    "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
+                                    pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
+                                )}
+                            >
+                                <div className="mb-10">
+                                    <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
+                                    <div className="mt-6 flex items-baseline gap-2">
+                                        <span className={cn("text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
+                                    </div>
+                                    <div className="mt-6 inline-flex max-w-full truncate items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
+                                        <Sparkles className="h-3 w-3 shrink-0" />
+                                        <span className="truncate">{pkg.support}</span>
+                                    </div>
+                                </div>
+
+                                <ul className="mb-12 flex-1 space-y-6">
+                                    {pkg.features.map((feature) => (
+                                        <li key={feature} className="flex items-start gap-4 text-sm font-medium">
+                                            <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+                                                <CheckCircle2 className="h-3 w-3" />
+                                            </div>
+                                            <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <div className={pkg.featured ? "[&_button]:bg-blue-600 [&_button]:hover:bg-white [&_button]:hover:text-slate-950 [&_span]:text-slate-400 [&_img]:opacity-80" : ""}>
+                                    <YocoPayButton
+                                        amountInCents={amountInCents}
+                                        description={`Acquisition: ${pkg.name}`}
+                                        label="Acquisition Buy-out"
+                                        onSuccess={() => window.open(createWhatsAppLink(waMsg), '_blank')}
+                                    />
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
+
+                {/* ---- VOTING ACQUISITION TIER ---- */}
                 <SectionHeading
                     eyebrow="Acquisitions"
                     title="Own the Full Architecture"
