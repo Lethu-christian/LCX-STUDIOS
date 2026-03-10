@@ -5,7 +5,6 @@ import { LCX_LOGO_B64 } from "./assets/logo-b64";
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
 import Account from "./components/Account";
-import FinancialAnalyzer from './components/FinancialAnalyzer';
 import Admin from "./components/Admin";
 import YocoPayButton from "./components/YocoPayButton";
 import {
@@ -34,7 +33,6 @@ import {
     Workflow,
     X,
     Zap,
-    Activity, // Added Activity icon for FinancialAnalyzer
 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "27678846390";
@@ -975,67 +973,6 @@ function Portfolio() {
     );
 }
 
-function AnalyzerCallout() {
-    const navigate = useNavigate();
-    return (
-        <section className="bg-white py-24 relative overflow-hidden border-t border-slate-100">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="relative overflow-hidden rounded-[3.5rem] bg-slate-50 border border-slate-200 p-8 sm:p-16 shadow-2xl group hover:border-blue-500/30 transition-all duration-700">
-                    <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-blue-500/5 blur-[100px]" />
-
-                    <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-12">
-                        <div className="max-w-2xl">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/20 mb-8">
-                                <Activity className="h-8 w-8" />
-                            </div>
-                            <h2 className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tighter leading-tight">
-                                AI Financial Analyzer
-                            </h2>
-                            <p className="mt-6 text-lg font-medium text-slate-500 leading-relaxed">
-                                Deep financial extraction and AI-powered business insights.
-                                Upload statements and get 100% accurate health scores with our Free priority reports (Testing Mode).
-                            </p>
-
-                            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                                {[
-                                    "Bank Statement Extraction",
-                                    "Cash Flow Analysis",
-                                    "Fraud & Risk Detection",
-                                    "Free AI Business Reports"
-                                ].map((point) => (
-                                    <div key={point} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-xs font-bold text-slate-700 shadow-sm">
-                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-blue-600">
-                                            <BadgeCheck className="h-4 w-4" />
-                                        </div>
-                                        {point}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-4 min-w-[240px]">
-                            <button
-                                onClick={() => navigate('/analyzer')}
-                                className="w-full rounded-2xl bg-blue-600 px-8 py-5 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 hover:shadow-2xl hover:scale-[1.02] active:scale-95 shadow-xl flex items-center justify-center gap-3"
-                            >
-                                Open Dashboard <ArrowRight className="h-5 w-5" />
-                            </button>
-                            <a
-                                href={createWhatsAppLink("Hello, I want to enquire about the AI Financial Analyzer.")}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="w-full rounded-2xl border border-slate-200 bg-white px-8 py-5 text-sm font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-slate-50 active:scale-95 shadow-md flex items-center justify-center"
-                            >
-                                Enquire Now
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
-
 function RequestForm() {
     const [form, setForm] = useState({
         fullName: "",
@@ -1409,15 +1346,6 @@ export default function App() {
     };
 
     if (location.pathname === "/admin") return <AdminPage />;
-    if (location.pathname === "/analyzer") {
-        return (
-            <div className="min-h-screen bg-[#020617]">
-                <TopNav session={session} onPortalClick={handlePortalClick} />
-                <FinancialAnalyzer session={session} />
-                <Footer />
-            </div>
-        );
-    }
     return (
         <div className="min-h-screen bg-white">
             <TopNav session={session} onPortalClick={handlePortalClick} />
@@ -1425,7 +1353,6 @@ export default function App() {
                 <Hero />
                 <PricingCards />
                 <PosterPricing />
-                <AnalyzerCallout />
                 <Portfolio />
                 <About />
                 <Services />
