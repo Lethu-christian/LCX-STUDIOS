@@ -892,16 +892,16 @@ function PricingCards() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 1, ease: luxuryEase }}
                                 className={cn(
-                                    "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
+                                    "group relative flex flex-col rounded-[3rem] border p-6 sm:p-10 lg:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
                                     pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
                                 )}
                             >
                                 <div className="mb-10">
                                     <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
                                     <div className="mt-6 flex items-baseline gap-2">
-                                        <span className={cn("text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
+                                        <span className={cn("text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
                                     </div>
-                                    <div className="mt-6 inline-flex max-w-full truncate items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
+                                    <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
                                         <Sparkles className="h-3 w-3 shrink-0" />
                                         <span className="truncate">{pkg.support}</span>
                                     </div>
@@ -954,19 +954,19 @@ function PricingCards() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: (prompt % 2) * 0.1, ease: luxuryEase }}
                                 className={cn(
-                                    "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_45px_100px_rgba(0,0,0,0.08)]",
+                                    "group relative flex flex-col rounded-[3rem] border p-6 sm:p-10 lg:p-14 transition-all hover:shadow-[0_45px_100px_rgba(0,0,0,0.08)]",
                                     pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
                                 )}
                             >
                                 <div className="mb-10">
                                     <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
                                     <div className="mt-6 flex items-baseline gap-2">
-                                        <span className={cn("text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
+                                        <span className={cn("text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
                                     </div>
                                     <div className="mt-6 flex flex-col gap-2">
-                                        <div className="inline-flex max-w-full items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
-                                            <Sparkles className="h-3 w-3 shrink-0" />
-                                            <span className="truncate">Best For: {pkg.bestFor}</span>
+                                        <div className="inline-flex max-w-full items-start sm:items-center gap-2 rounded-full bg-blue-600/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-blue-500 leading-relaxed">
+                                            <Sparkles className="h-3 w-3 shrink-0 mt-0.5 sm:mt-0" />
+                                            <span className="whitespace-normal text-left">Best For: {pkg.bestFor}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1058,18 +1058,18 @@ function PricingCards() {
                                 viewport={{ once: true }}
                                 transition={{ duration: 1, ease: luxuryEase }}
                                 className={cn(
-                                    "group relative flex flex-col rounded-[3rem] border p-8 sm:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
+                                    "group relative flex flex-col rounded-[3rem] border p-6 sm:p-10 lg:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
                                     pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
                                 )}
                             >
                                 <div className="mb-10">
                                     <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
                                     <div className="mt-6 flex items-baseline gap-2">
-                                        <span className={cn("text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
+                                        <span className={cn("text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
                                     </div>
                                     <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
-                                        <Sparkles className="h-3 w-3" />
-                                        {pkg.support}
+                                        <Sparkles className="h-3 w-3 shrink-0" />
+                                        <span className="whitespace-normal text-left">{pkg.support}</span>
                                     </div>
                                 </div>
 
