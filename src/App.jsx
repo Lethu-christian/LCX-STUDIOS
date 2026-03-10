@@ -57,7 +57,6 @@ const staggerContainer = {
 const navItems = [
     { label: "About", href: "#about" },
     { label: "Services", href: "#services" },
-    { label: "Portfolio", href: "#portfolio" },
     { label: "Pricing", href: "#pricing" },
     { label: "Contact", href: "#contact" },
 ];
@@ -119,44 +118,6 @@ const serviceCards = [
         ],
         whatsapp: "Hello, I want logo design services.",
     }
-];
-
-const portfolioItems = [
-    {
-        category: "Voting Platform",
-        title: "LCX Elite Voting System",
-        desc: "A premium voting experience for pageantry audiences with contestant pages, live rankings, admin control, and conversion-focused purchase flows.",
-        badge: "Featured SaaS",
-        image: "https://images.unsplash.com/photo-1551288049-bbbda536639a?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        category: "Internal Business System",
-        title: "LCX Studio Internal Operations",
-        desc: "A custom business operations system with staff control, orders, finance tracking, and admin dashboards.",
-        badge: "Business Systems",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        category: "Poster Design",
-        title: "LCX Signature Pageant Posters",
-        desc: "Bold, luxurious visual campaign work designed for pageant promotion, contestant highlights, and event visibility.",
-        badge: "Creative Direction",
-        image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        category: "Poster Design",
-        title: "Miss Qhawekazi Posters",
-        desc: "Elegant pageantry poster direction crafted to communicate prestige, beauty, and strong event identity.",
-        badge: "Portfolio Work",
-        image: "https://images.unsplash.com/photo-1605142859862-978be7eba909?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-        category: "Poster Design",
-        title: "Miss Cosset Posters",
-        desc: "Premium event poster concepts with polished layouts, modern typography, and strong social-media-ready appeal.",
-        badge: "Luxury Visuals",
-        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
-    },
 ];
 
 const posterPricing = [
@@ -1154,113 +1115,6 @@ function PosterPricing() {
     );
 }
 
-function Portfolio() {
-    const [dbItems, setDbItems] = useState([]);
-    const [selectedItem, setSelectedItem] = useState(null);
-
-    useEffect(() => {
-        const fetchPortfolio = async () => {
-            const { data, error } = await supabase
-                .from('portfolio_items')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (!error && data) setDbItems(data);
-        };
-        fetchPortfolio();
-    }, []);
-
-    const displayItems = dbItems.length > 0 ? dbItems : portfolioItems;
-
-    return (
-        <section id="portfolio" className="bg-[#020617] py-32 relative overflow-hidden">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <SectionHeading
-                    eyebrow="Portfolio"
-                    title="Selected Works"
-                    description="A showcase of elite systems and high-end visual direction crafted by our studio."
-                    theme="dark"
-                />
-
-                <div className="mt-20 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                    {displayItems.map((item, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: i * 0.1, ease: luxuryEase }}
-                            className="group relative cursor-pointer"
-                            onClick={() => setSelectedItem(item)}
-                        >
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] border border-slate-800 bg-slate-900 shadow-2xl">
-                                <img
-                                    src={item.cover_image || item.image_url || item.image}
-                                    alt={item.title}
-                                    className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-10">
-                                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/20 border border-blue-500/30 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-blue-400 mb-4">
-                                        {item.category}
-                                    </div>
-                                    <h3 className="text-2xl font-black text-white tracking-tight">{item.title}</h3>
-                                    <p className="mt-4 text-xs font-medium text-slate-400 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                        {item.desc || item.description}
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {selectedItem && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-xl p-4 sm:p-8"
-                    >
-                        <button
-                            onClick={() => setSelectedItem(null)}
-                            className="absolute top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/10 text-white hover:bg-slate-900/20 transition-all backdrop-blur-md border border-slate-500"
-                        >
-                            <X size={24} />
-                        </button>
-
-                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2rem] sm:rounded-[3rem] bg-slate-900 border border-slate-600 shadow-2xl custom-scrollbar flex flex-col flex-nowrap" onClick={e => e.stopPropagation()}>
-                            <div className="p-8 md:p-12 border-b border-slate-600 shrink-0">
-                                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-600 bg-slate-900/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">
-                                    <ImageIcon size={12} /> {selectedItem.category}
-                                </div>
-                                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">{selectedItem.title}</h2>
-                                <p className="mt-6 text-slate-400 md:text-lg leading-relaxed max-w-3xl">
-                                    {selectedItem.desc || selectedItem.description}
-                                </p>
-                            </div>
-                            <div className="p-8 md:p-12 bg-slate-900 flex-grow">
-                                {(!selectedItem.gallery_images || selectedItem.gallery_images.length === 0) ? (
-                                    <div className="rounded-[2.5rem] overflow-hidden">
-                                        <img src={selectedItem.cover_image || selectedItem.image_url || selectedItem.image} alt={selectedItem.title} className="w-full h-auto object-cover" />
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-10 grid-cols-1">
-                                        {selectedItem.gallery_images.map((imgUrl, idx) => (
-                                            <div key={idx} className="overflow-hidden rounded-[2rem] border border-slate-600 bg-slate-900 shadow-2xl">
-                                                <img src={imgUrl} alt={`${selectedItem.title} screenshot ${idx + 1}`} className="w-full h-auto object-cover" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </section>
-    );
-}
-
 function RequestForm() {
     const [form, setForm] = useState({
         fullName: "",
@@ -1641,7 +1495,6 @@ export default function App() {
                 <Hero />
                 <PricingCards />
                 <PosterPricing />
-                <Portfolio />
                 <About />
                 <Services />
                 <RequestForm />

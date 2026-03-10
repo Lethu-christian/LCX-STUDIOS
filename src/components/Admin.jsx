@@ -92,7 +92,6 @@ export default function Admin() {
     const [loading, setLoading] = useState(false);
     const [profiles, setProfiles] = useState([]);
     const [sites, setSites] = useState([]);
-    const [portfolioItems, setPortfolioItems] = useState([]);
     const [services, setServices] = useState([]);
     const [isPinVerified, setIsPinVerified] = useState(false);
     const [pinInput, setPinInput] = useState('');
@@ -102,14 +101,6 @@ export default function Admin() {
     const [financialUploads, setFinancialUploads] = useState([]);
     const [toast, setToast] = useState(null);
     const navigate = useNavigate();
-
-    // Portfolio Modal State
-    const [showPortfolioModal, setShowPortfolioModal] = useState(false);
-    const [editingPortfolioId, setEditingPortfolioId] = useState(null);
-    const [portfolioForm, setPortfolioForm] = useState({
-        title: '', category: 'Voting Platform', description: '', badge: '',
-        cover_image: '', gallery_images: ''
-    });
 
     // Service Modal State
     const [showServiceModal, setShowServiceModal] = useState(false);
@@ -145,15 +136,13 @@ export default function Admin() {
         setLoading(true);
         try {
             // Fetch profiles, sites, portfolio, services normally
-            const [profilesRes, sitesRes, portfolioRes, servicesRes] = await Promise.all([
+            const [profilesRes, sitesRes, servicesRes] = await Promise.all([
                 supabase.from('profiles').select('*').order('updated_at', { ascending: false }),
                 supabase.from('sites').select('*, profiles(full_name)').order('created_at', { ascending: false }),
-                supabase.from('portfolio_items').select('*').order('created_at', { ascending: false }),
                 supabase.from('services').select('*').order('display_order', { ascending: true }),
             ]);
             setProfiles(profilesRes.data || []);
             setSites(sitesRes.data || []);
-            setPortfolioItems(portfolioRes.data || []);
             setServices(servicesRes.data || []);
 
             // Fetch purchases via edge function (service role — bypasses RLS entirely)
@@ -183,54 +172,6 @@ export default function Admin() {
         p.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.username?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-    // ---- PORTFOLIO ACTIONS ----
-    const handlePortfolioSubmit = async (e) => {
-        e.preventDefault();
-        const galleryArray = portfolioForm.gallery_images.split('\n').map(s => s.trim()).filter(Boolean);
-        const payload = {
-            title: portfolioForm.title, category: portfolioForm.category,
-            description: portfolioForm.description, badge: portfolioForm.badge,
-            cover_image: portfolioForm.cover_image, gallery_images: galleryArray
-        };
-        try {
-            if (editingPortfolioId) {
-                await supabase.from('portfolio_items').update(payload).eq('id', editingPortfolioId);
-            } else {
-                await supabase.from('portfolio_items').insert([payload]);
-            }
-            setShowPortfolioModal(false);
-            fetchData();
-            showToast(editingPortfolioId ? 'Portfolio item updated!' : 'Portfolio item created!');
-        } catch (error) {
-            console.error("Error saving portfolio item:", error);
-            showToast("Failed to save. Check Supabase connection.", 'error');
-        }
-    };
-
-    const editPortfolioItem = (item) => {
-        setEditingPortfolioId(item.id);
-        setPortfolioForm({
-            title: item.title, category: item.category,
-            description: item.description || '', badge: item.badge || '',
-            cover_image: item.cover_image || '',
-            gallery_images: (item.gallery_images || []).join('\n')
-        });
-        setShowPortfolioModal(true);
-    };
-
-    const deletePortfolioItem = async (id) => {
-        if (!window.confirm("Delete this portfolio item?")) return;
-        await supabase.from('portfolio_items').delete().eq('id', id);
-        fetchData();
-        showToast('Portfolio item deleted.');
-    };
-
-    const openCreatePortfolioModal = () => {
-        setEditingPortfolioId(null);
-        setPortfolioForm({ title: '', category: 'Voting Platform', description: '', badge: '', cover_image: '', gallery_images: '' });
-        setShowPortfolioModal(true);
-    };
 
     // ---- SERVICE ACTIONS ----
     const handleServiceSubmit = async (e) => {
@@ -311,7 +252,6 @@ export default function Admin() {
 
     const tabs = [
         { id: 'overview', label: 'Overview' },
-        { id: 'portfolio', label: 'Portfolio' },
         { id: 'services', label: 'Services' },
         { id: 'purchases', label: `Purchases ${purchases.length > 0 ? `(${purchases.length})` : ''}` },
         { id: 'monitoring', label: `Monitoring ${financialUploads.length > 0 ? `(${financialUploads.length})` : ''}` },
@@ -440,64 +380,6 @@ export default function Admin() {
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
-                )}
-
-                {/* ---- PORTFOLIO TAB ---- */}
-                {activeTab === 'portfolio' && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <h2 className="text-3xl font-bold tracking-tight flex items-center gap-3"><ImageIcon className="text-blue-500" /> Portfolio Manager</h2>
-                                <p className="text-slate-400 text-sm mt-1">Add your work items here — they appear live on the website.</p>
-                            </div>
-                            <button onClick={openCreatePortfolioModal}
-                                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-md active:scale-95 shrink-0">
-                                <Plus size={18} /> Add New Item
-                            </button>
-                        </div>
-
-                        {loading ? <div className="text-center py-20 text-slate-400">Loading...</div> :
-                            portfolioItems.length === 0 ? (
-                                <div className="py-20 text-center border-2 border-dashed border-slate-700 rounded-[3rem]">
-                                    <ImageIcon size={48} className="mx-auto mb-4 text-slate-600" />
-                                    <h3 className="text-xl font-bold mb-2">No portfolio items yet</h3>
-                                    <p className="text-slate-400 mb-6 text-sm">Create your first item to display it on the site.</p>
-                                    <button onClick={openCreatePortfolioModal} className="text-blue-400 font-bold hover:underline">+ Create Item</button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {portfolioItems.map(item => (
-                                        <div key={item.id} className="bg-slate-900 rounded-3xl border border-slate-700 overflow-hidden shadow group hover:border-blue-500/40 transition-all">
-                                            <div className="aspect-[4/3] relative bg-slate-800">
-                                                {item.cover_image
-                                                    ? <img src={item.cover_image} alt={item.title} className="w-full h-full object-cover" />
-                                                    : <div className="w-full h-full flex items-center justify-center text-slate-600"><ImageIcon size={48} /></div>}
-                                                <div className="absolute top-3 left-3">
-                                                    <span className="bg-slate-900/90 backdrop-blur text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">{item.category}</span>
-                                                </div>
-                                            </div>
-                                            <div className="p-5">
-                                                <h3 className="font-bold text-white mb-1 truncate">{item.title}</h3>
-                                                <p className="text-xs text-slate-400 line-clamp-2 mb-4">{item.description}</p>
-                                                {item.gallery_images?.length > 0 && (
-                                                    <p className="text-[10px] text-slate-500 mb-4">{item.gallery_images.length} gallery image(s)</p>
-                                                )}
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => editPortfolioItem(item)}
-                                                        className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-700 transition-colors">
-                                                        <Edit2 size={14} /> Edit
-                                                    </button>
-                                                    <button onClick={() => deletePortfolioItem(item.id)}
-                                                        className="flex items-center justify-center p-2.5 bg-red-900/30 text-red-400 rounded-xl hover:bg-red-900/60 transition-colors">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                     </motion.div>
                 )}
 
@@ -709,57 +591,6 @@ export default function Admin() {
                 )}
 
             </main>
-
-            {/* ---- PORTFOLIO MODAL ---- */}
-            <AnimatePresence>
-                {showPortfolioModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-2xl my-8 overflow-hidden border border-slate-700">
-                            <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-800 bg-[#020617]/50">
-                                <h3 className="text-2xl font-bold">{editingPortfolioId ? 'Edit Portfolio Item' : 'New Portfolio Item'}</h3>
-                                <button onClick={() => setShowPortfolioModal(false)} className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors"><X size={20} /></button>
-                            </div>
-                            <form onSubmit={handlePortfolioSubmit} className="p-6 md:p-8 space-y-6 overflow-y-auto max-h-[75vh] custom-scrollbar">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Title *</label>
-                                        <input required className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
-                                            value={portfolioForm.title} onChange={e => setPortfolioForm({ ...portfolioForm, title: e.target.value })} placeholder="e.g. Miss Qhawekazi Voting Platform" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Category *</label>
-                                        <select required className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
-                                            value={portfolioForm.category} onChange={e => setPortfolioForm({ ...portfolioForm, category: e.target.value })}>
-                                            <option>Voting Platform</option>
-                                            <option>Internal Business System</option>
-                                            <option>Poster Design</option>
-                                            <option>Logo Design</option>
-                                            <option>Web Design</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Description *</label>
-                                    <textarea required rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none resize-none text-white"
-                                        value={portfolioForm.description} onChange={e => setPortfolioForm({ ...portfolioForm, description: e.target.value })} placeholder="Brief description of the work..." />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Badge Text (Optional)</label>
-                                    <input className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-[#020617] focus:border-blue-500 focus:outline-none text-white"
-                                        value={portfolioForm.badge} onChange={e => setPortfolioForm({ ...portfolioForm, badge: e.target.value })} placeholder="e.g. Featured SaaS" />
-                                </div>
-                                <ImageUploadField label="Cover Image (Upload from PC)" value={portfolioForm.cover_image} onChange={url => setPortfolioForm({ ...portfolioForm, cover_image: url })} />
-                                <ImageUploadField label="Gallery Images (Upload multiple from PC)" value={portfolioForm.gallery_images} onChange={val => setPortfolioForm({ ...portfolioForm, gallery_images: val })} multiple />
-                                <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row justify-end gap-3">
-                                    <button type="button" onClick={() => setShowPortfolioModal(false)} className="px-6 py-3 font-bold text-slate-400 hover:text-white transition-colors">Cancel</button>
-                                    <button type="submit" className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-500 transition-colors active:scale-95">Save Item</button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
 
             {/* ---- SERVICE MODAL ---- */}
             <AnimatePresence>
