@@ -788,80 +788,16 @@ function PricingCards() {
 
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
 
-                {/* ---- INTERNAL BUSINESS SYSTEMS TIER ---- */}
+                {/* ---- DIGITAL BUSINESS INFRASTRUCTURE TIER ---- */}
                 <SectionHeading
-                    eyebrow="Business Ops"
-                    title="Internal System Packages"
-                    description="Digitize your operations, HR, finance, and management under one integrated dashboard."
+                    eyebrow="Digital Business Infrastructure"
+                    title="Digital Business Infrastructure Development"
+                    description="Because businesses don’t just want a website — they want systems that run their operations."
                     center
                 />
 
                 <div className="mt-20 mb-40 grid gap-10 lg:grid-cols-2">
-                    {businessPackages.map((pkg, i) => {
-                        const amountString = pkg.price.replace(/[^0-9]/g, '');
-                        // If ranges are provided, parsing simply reads the first number.
-                        // "R25,000 – R35,000" -> amountString -> 25000
-                        const amountInCents = parseInt(amountString, 10) * 100;
-                        const waMsg = `Hello LCX STUDIOS. I have just made a payment of ${pkg.price} for the ${pkg.name}. Please get in touch to finalize.`;
-                        return (
-                            <motion.div
-                                key={pkg.name}
-                                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 1, ease: luxuryEase }}
-                                className={cn(
-                                    "group relative flex flex-col rounded-[3rem] border p-6 sm:p-10 lg:p-14 transition-all hover:shadow-[0_60px_100px_rgba(0,0,0,0.08)]",
-                                    pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
-                                )}
-                            >
-                                <div className="mb-10">
-                                    <h3 className={cn("text-2xl font-black tracking-tight", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.name}</h3>
-                                    <div className="mt-6 flex items-baseline gap-2">
-                                        <span className={cn("text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter", pkg.featured ? "text-white" : "text-slate-950")}>{pkg.price}</span>
-                                    </div>
-                                    <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-500">
-                                        <Sparkles className="h-3 w-3 shrink-0" />
-                                        <span className="truncate">{pkg.support}</span>
-                                    </div>
-                                </div>
-
-                                <ul className="mb-12 flex-1 space-y-6">
-                                    {pkg.features.map((feature) => (
-                                        <li key={feature} className="flex items-start gap-4 text-sm font-medium">
-                                            <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                                                <CheckCircle2 className="h-3 w-3" />
-                                            </div>
-                                            <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                <div className={pkg.featured ? "[&_button]:bg-blue-600 [&_button]:hover:bg-white [&_button]:hover:text-slate-950 [&_span]:text-slate-400 [&_img]:opacity-80" : ""}>
-                                    <YocoPayButton
-                                        amountInCents={amountInCents}
-                                        description={`Acquisition: ${pkg.name}`}
-                                        label="Acquisition Buy-out"
-                                        onSuccess={() => window.open(createWhatsAppLink(waMsg), '_blank')}
-                                    />
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
-
-                {/* ---- BUSINESS SYSTEMS & OPERATIONS OPTIMIZATION TIER ---- */}
-                <SectionHeading
-                    eyebrow="Consulting & Strategy"
-                    title="Business Systems & Operations Optimization"
-                    description="Deep-dive operational analysis to identify bottlenecks and digitize workflows for scale."
-                    center
-                />
-
-                <div className="mt-20 mb-20 grid gap-10 lg:grid-cols-2">
-                    {analysisPackages.map((pkg, i) => {
+                    {digitalBusinessPackages.map((pkg, i) => {
                         const amountString = pkg.price.replace(/[^0-9]/g, '');
                         const amountInCents = parseInt(amountString, 10) * 100;
                         const waMsg = `Hello LCX STUDIOS. I have just made a payment of ${pkg.price} for the ${pkg.name}. Please get in touch to get started.`;
@@ -871,7 +807,7 @@ function PricingCards() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: (prompt % 2) * 0.1, ease: luxuryEase }}
+                                transition={{ duration: 0.8, delay: (i % 2) * 0.1, ease: luxuryEase }}
                                 className={cn(
                                     "group relative flex flex-col rounded-[3rem] border p-6 sm:p-10 lg:p-14 transition-all hover:shadow-[0_45px_100px_rgba(0,0,0,0.08)]",
                                     pkg.featured ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
@@ -887,43 +823,56 @@ function PricingCards() {
                                             <Sparkles className="h-3 w-3 shrink-0 mt-0.5 sm:mt-0" />
                                             <span className="whitespace-normal text-left">Best For: {pkg.bestFor}</span>
                                         </div>
+                                        <div className="inline-flex max-w-full items-start sm:items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-600 leading-relaxed w-fit">
+                                            <Zap className="h-3 w-3 shrink-0 mt-0.5 sm:mt-0" />
+                                            <span className="whitespace-normal text-left">Delivery Time: {pkg.delivery}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-8 sm:grid-cols-2 mb-12 flex-1">
-                                    <div>
-                                        <h4 className={cn("text-xs font-black uppercase tracking-widest mb-4", pkg.featured ? "text-slate-300" : "text-slate-400")}>Includes</h4>
-                                        <ul className="space-y-4">
-                                            {pkg.features.map((feature) => (
-                                                <li key={feature} className="flex items-start gap-4 text-sm font-medium">
-                                                    <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-blue-500">
-                                                        <CheckCircle2 className="h-2 w-2" />
+                                <div className="mb-12 flex-1">
+                                    <h4 className={cn("text-xs font-black uppercase tracking-widest mb-4", pkg.featured ? "text-slate-300" : "text-slate-400")}>Includes</h4>
+                                    <ul className="space-y-4">
+                                        {pkg.features.map((feature) => (
+                                            <li key={feature} className="flex items-start gap-4 text-sm font-medium">
+                                                <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-blue-500">
+                                                    <CheckCircle2 className="h-2 w-2" />
+                                                </div>
+                                                <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {(pkg.pages || pkg.addons) && (
+                                        <div className="mt-8">
+                                            {pkg.pages && (
+                                                <>
+                                                    <h4 className={cn("text-xs font-black uppercase tracking-widest mb-4 mt-6", pkg.featured ? "text-slate-300" : "text-slate-400")}>Example Pages</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {pkg.pages.map(page => (
+                                                            <span key={page} className={cn("text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full", pkg.featured ? "bg-white/10 text-white border border-white/20" : "bg-slate-100 text-slate-600 border border-slate-200")}>{page}</span>
+                                                        ))}
                                                     </div>
-                                                    <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4 className={cn("text-xs font-black uppercase tracking-widest mb-4", pkg.featured ? "text-slate-300" : "text-slate-400")}>Deliverables</h4>
-                                        <ul className="space-y-4">
-                                            {pkg.deliverables.map((del) => (
-                                                <li key={del} className="flex items-start gap-4 text-sm font-medium">
-                                                    <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500">
-                                                        <BadgeCheck className="h-2 w-2" />
+                                                </>
+                                            )}
+                                            {pkg.addons && (
+                                                <>
+                                                    <h4 className={cn("text-xs font-black uppercase tracking-widest mb-4 mt-6", pkg.featured ? "text-slate-300" : "text-slate-400")}>Optional Add-Ons</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {pkg.addons.map(addon => (
+                                                            <span key={addon} className={cn("text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border", pkg.featured ? "border-amber-500/30 text-amber-400 bg-amber-500/10" : "border-amber-200 text-amber-600 bg-amber-50")}>+ {addon}</span>
+                                                        ))}
                                                     </div>
-                                                    <span className={pkg.featured ? "text-slate-400" : "text-slate-600"}>{del}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className={pkg.featured ? "[&_button]:bg-blue-600 [&_button]:hover:bg-white [&_button]:hover:text-slate-950 [&_span]:text-slate-400 [&_img]:opacity-80" : ""}>
                                     <YocoPayButton
                                         amountInCents={amountInCents}
-                                        description={`Analysis: ${pkg.name}`}
-                                        label="Book Analysis"
+                                        description={`Package: ${pkg.name}`}
+                                        label="Book Package"
                                         onSuccess={() => window.open(createWhatsAppLink(waMsg), '_blank')}
                                     />
                                 </div>
@@ -932,29 +881,37 @@ function PricingCards() {
                     })}
                 </div>
 
-                {/* Optional Addons */}
+                {/* Monthly Maintenance Plans */}
                 <div className="mx-auto max-w-4xl mb-40 text-center rounded-[3rem] border border-slate-200 bg-slate-50 p-10 sm:p-14 shadow-xl">
                     <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-orange-600 mb-6">
                         <Zap className="h-3 w-3" />
-                        Optional Add-On Services
+                        Maintenance Plans
                     </div>
-                    <h3 className="text-3xl font-black text-slate-950 tracking-tight mb-8">System Engineering & Maintenance</h3>
+                    <h3 className="text-3xl font-black text-slate-950 tracking-tight mb-8">Monthly Maintenance</h3>
                     <div className="grid sm:grid-cols-2 gap-8 text-left">
-                        <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm">
-                            <h4 className="text-xl font-bold text-slate-950 tracking-tight">System Development</h4>
-                            <div className="text-blue-600 font-black mt-2 mb-4">R55,000 – R100,000+</div>
-                            <p className="text-sm text-slate-500 mb-6 font-medium">After analysis, we build the custom solution. Includes internal systems, HR portals, payment verification, and inventory management.</p>
-                            <a href={createWhatsAppLink("Hello, I am interested in building a custom system post-analysis.")} target="_blank" rel="noreferrer" className="text-sm font-black text-slate-950 hover:text-blue-600 transition flex items-center gap-2">Discuss Build <ArrowRight className="h-4 w-4" /></a>
+                        <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm transition hover:shadow-md">
+                            <h4 className="text-xl font-bold text-slate-950 tracking-tight">Basic Maintenance</h4>
+                            <div className="text-blue-600 font-black mt-2 mb-4">R1,500 / month</div>
+                            <ul className="text-sm text-slate-500 mb-6 font-medium space-y-2">
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Website updates</li>
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Security monitoring</li>
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Backup management</li>
+                            </ul>
+                            <a href={createWhatsAppLink("Hello, I need basic monthly maintenance.")} target="_blank" rel="noreferrer" className="text-sm font-black text-slate-950 hover:text-blue-600 transition flex items-center gap-2">Request Maintenance <ArrowRight className="h-4 w-4" /></a>
                         </div>
-                        <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm">
-                            <h4 className="text-xl font-bold text-slate-950 tracking-tight">Monthly Maintenance</h4>
-                            <div className="text-blue-600 font-black mt-2 mb-4">R3,000 – R6,000 / mo</div>
-                            <p className="text-sm text-slate-500 mb-6 font-medium">Guaranteed uptime and studio support. Includes system monitoring, updates, data backups, and technical support.</p>
-                            <a href={createWhatsAppLink("Hello, I need monthly business systems maintenance.")} target="_blank" rel="noreferrer" className="text-sm font-black text-slate-950 hover:text-blue-600 transition flex items-center gap-2">Request Maintenance <ArrowRight className="h-4 w-4" /></a>
+                        <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm transition hover:shadow-md">
+                            <h4 className="text-xl font-bold text-slate-950 tracking-tight">Advanced Maintenance</h4>
+                            <div className="text-blue-600 font-black mt-2 mb-4">R3,000 – R6,000 / month</div>
+                            <ul className="text-sm text-slate-500 mb-6 font-medium space-y-2">
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Website updates</li>
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> System maintenance & Bug fixes</li>
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Database monitoring</li>
+                                <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Technical support</li>
+                            </ul>
+                            <a href={createWhatsAppLink("Hello, I need advanced monthly maintenance.")} target="_blank" rel="noreferrer" className="text-sm font-black text-slate-950 hover:text-blue-600 transition flex items-center gap-2">Request Maintenance <ArrowRight className="h-4 w-4" /></a>
                         </div>
                     </div>
                 </div>
-
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-40" />
 
                 {/* ---- VOTING ACQUISITION TIER ---- */}
