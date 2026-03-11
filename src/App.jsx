@@ -798,7 +798,8 @@ function PricingCards() {
 
                 <div className="mt-20 mb-40 grid gap-10 lg:grid-cols-2">
                     {digitalBusinessPackages.map((pkg, i) => {
-                        const amountString = pkg.price.replace(/[^0-9]/g, '');
+                        const match = pkg.price.match(/\d+(?:,\d+)?/);
+                        const amountString = match ? match[0].replace(/,/g, '') : "0";
                         const amountInCents = parseInt(amountString, 10) * 100;
                         const waMsg = `Hello LCX STUDIOS. I have just made a payment of ${pkg.price} for the ${pkg.name}. Please get in touch to get started.`;
                         return (
