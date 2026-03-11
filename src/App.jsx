@@ -186,124 +186,82 @@ const votingPackages = [
     },
 ];
 
-const businessPackages = [
+const digitalBusinessPackages = [
     {
-        name: "Internal Operations System",
-        price: "R25,000",
-        support: "14 days technical support after delivery",
-        whatsapp: "Hello, I’m interested in your Internal Operations System package.",
+        name: "Startup Website Package",
+        price: "R6,000 – R12,000",
+        bestFor: "Startups, small shops, personal brands, and small service businesses.",
+        delivery: "7–10 days",
+        whatsapp: "Hello, I’m interested in your Startup Website Package.",
         featured: false,
         features: [
-            "Secure employee login portal",
-            "Payment verification system (search customer name & amount)",
-            "Bank statement PDF upload and payment tracking",
-            "Employee dashboard",
-            "Customer payment history view",
-            "Basic reporting dashboard",
-            "Admin panel for managing employees",
-            "Secure cloud database storage",
-            "Modern responsive interface"
+            "4–6 page professional website",
+            "Mobile responsive design",
+            "Contact form",
+            "Google Maps integration",
+            "WhatsApp chat button",
+            "Basic SEO setup",
+            "Social media links"
         ],
+        pages: ["Home", "About", "Services", "Contact", "Gallery"]
     },
     {
-        name: "Full Internal Business Management System",
-        price: "R55,000",
-        support: "30 days technical support + Staff training",
-        whatsapp: "Hello, I’m interested in the Full Internal Business Management System package.",
+        name: "Business Website Package",
+        price: "R15,000 – R30,000",
+        bestFor: "Growing businesses that need a professional online presence.",
+        delivery: "10–14 days",
+        whatsapp: "Hello, I’m interested in your Business Website Package.",
         featured: true,
         features: [
-            "Secure employee portal & work activity dashboard",
-            "HR Management (Leave & Sick note uploads, attendance, records)",
-            "Payroll Management (Payslip generation, salary records)",
-            "Financial Verification (Upload bank statements, payment extraction)",
-            "Admin Dashboard (Activity logs, analytics, reporting)",
-            "Role permissions (Admin / HR / Staff) & secure storage",
-            "Data Export (Excel / CSV) and Backup tools"
+            "6–10 page professional website",
+            "Mobile optimized design",
+            "Contact forms and lead capture",
+            "WhatsApp integration",
+            "Basic SEO optimization",
+            "Blog/news section",
+            "Admin panel for content updates",
+            "Google Analytics integration"
         ],
+        addons: ["Online booking system"]
     },
-];
-
-const analysisPackages = [
     {
-        name: "Startup Business Analysis",
-        price: "R5,000",
-        bestFor: "Startups, small shops, online businesses, and small service companies.",
-        whatsapp: "Hello, I’m interested in your Startup Business Analysis package.",
+        name: "E-Commerce Website Package",
+        price: "R30,000 – R60,000",
+        bestFor: "Businesses selling products online.",
+        delivery: "2–3 weeks",
+        whatsapp: "Hello, I’m interested in your E-Commerce Website Package.",
         featured: false,
         features: [
-            "1 consultation session (60–90 minutes)",
-            "Review of business operations",
-            "Identify operational problems",
-            "Identify growth opportunities",
-            "Basic workflow analysis"
-        ],
-        deliverables: [
-            "5–8 page Business Analysis Report",
-            "Improvement recommendations",
-            "Basic automation suggestions"
+            "Full online store",
+            "Product catalog management",
+            "Secure payment gateway integration (Paystack / Yoco / PayFast)",
+            "Shopping cart and checkout system",
+            "Order management dashboard",
+            "Customer accounts",
+            "Inventory tracking",
+            "Mobile optimized store"
         ]
     },
     {
-        name: "Small Business Operational Analysis",
-        price: "R15,000",
-        bestFor: "Businesses with 3–20 employees.",
-        whatsapp: "Hello, I’m interested in the Small Business Operational Analysis package.",
+        name: "Advanced Business System + Website",
+        price: "R55,000 – R100,000",
+        bestFor: "Businesses needing internal systems + website integration.",
+        delivery: "3–5 weeks",
+        whatsapp: "Hello, I’m interested in your Advanced Business System + Website package.",
         featured: true,
         features: [
-            "Full operational review",
-            "Staff workflow analysis",
-            "Current system evaluation",
-            "Technology usage analysis",
-            "Identification of inefficiencies"
-        ],
-        deliverables: [
-            "10–15 page Business Analysis Report",
-            "Business process diagrams",
-            "Automation opportunities",
-            "System recommendations"
-        ]
-    },
-    {
-        name: "Business Optimization Analysis",
-        price: "R30,000",
-        bestFor: "Growing businesses with multiple departments.",
-        whatsapp: "Hello, I’m interested in the Business Optimization Analysis package.",
-        featured: false,
-        features: [
-            "Full operations analysis",
-            "HR process analysis",
-            "Financial workflow review",
-            "Customer process analysis",
-            "Risk and fraud analysis"
-        ],
-        deliverables: [
-            "15–25 page Business Optimization Report",
-            "Gap analysis (current vs improved operations)",
-            "Automation strategy",
-            "Technology improvement roadmap"
-        ]
-    },
-    {
-        name: "Enterprise Digital Transformation Analysis",
-        price: "R60,000",
-        bestFor: "Medium to large companies.",
-        whatsapp: "Hello, I’m interested in the Enterprise Digital Transformation Analysis package.",
-        featured: true,
-        features: [
-            "Complete organizational analysis",
-            "Department workflow analysis",
-            "IT systems evaluation",
-            "Data management review",
-            "Security and fraud risk assessment"
-        ],
-        deliverables: [
-            "25–40 page Enterprise Analysis Report",
-            "Process re-engineering strategy",
-            "Custom system design recommendations",
-            "Digital transformation roadmap"
+            "Custom website design (Mobile responsive & SEO optimized)",
+            "Contact forms and lead capture",
+            "Employee portal & HR leave request system",
+            "Sick note submission portal",
+            "Admin approval dashboard",
+            "Payroll creation system & Employee records management",
+            "Financial Verification (Bank statements, Payment search & history)",
+            "Admin Dashboard (Staff activity logs, HR requests, Financial reports)"
         ]
     }
 ];
+
 
 const rentalPackages = [
     {
